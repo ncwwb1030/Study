@@ -3,34 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INFS5720 Revision Master V13</title>
-    
+    <title>INFS5720 Final Revision</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; -webkit-tap-highlight-color: transparent; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .app-gradient { background: linear-gradient(135deg, #2563eb, #7c3aed); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* App Gradient */
-        .app-gradient {
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #059669 100%);
-            background-size: 200% 200%;
-        }
-
-        /* Option Selection Styles */
-        .opt-btn { transition: all 0.2s; border: 2px solid #e5e7eb; }
-        .opt-btn:active { transform: scale(0.98); }
-        
-        /* Correct/Wrong States */
-        .opt-correct { background-color: #dcfce7; border-color: #22c55e; color: #14532d; font-weight: bold; }
-        .opt-wrong { background-color: #fee2e2; border-color: #ef4444; color: #7f1d1d; opacity: 0.7; }
-        .opt-neutral:hover { background-color: #f9fafb; border-color: #cbd5e1; }
-
         [v-cloak] { display: none; }
     </style>
 </head>
@@ -38,205 +19,137 @@
 
 <div id="app" v-cloak class="min-h-screen flex flex-col bg-gray-50">
 
-    <header class="app-gradient text-white pb-24 pt-10 px-6 rounded-b-[2.5rem] shadow-xl z-10 relative">
+    <header class="app-gradient text-white pb-20 pt-8 px-6 rounded-b-[2.5rem] shadow-lg relative z-10">
         <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-3xl font-extrabold tracking-tight">INFS5720</h1>
-                <p class="text-blue-100 text-sm font-medium mt-1">Full Content Edition</p>
+                <h1 class="text-3xl font-extrabold">INFS5720</h1>
+                <p class="text-blue-100 text-xs">Revision Master</p>
             </div>
-            <div class="flex items-center gap-3">
-                <button @click="resetApp" class="bg-white/20 px-3 py-1 rounded-lg text-xs hover:bg-white/30 transition">Reset</button>
-                <div class="bg-white/20 p-3 rounded-full relative">
-                    <i class="fas fa-graduation-cap text-2xl"></i>
-                    <div v-if="mistakes.length > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
-                        {{ mistakes.length }}
-                    </div>
-                </div>
-            </div>
+            <button @click="resetApp" class="bg-white/20 px-3 py-1 rounded text-xs">Reset Data</button>
         </div>
-
-        <nav class="flex justify-between items-end px-1 overflow-x-auto hide-scrollbar gap-2">
+        <nav class="flex justify-between px-2">
             <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id"
-                class="flex flex-col items-center group transition-all duration-300 min-w-[3.5rem]"
-                :class="currentTab === tab.id ? 'transform scale-110 opacity-100' : 'opacity-60 hover:opacity-90'">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-lg transition-all border-2"
-                     :class="currentTab === tab.id ? 'bg-white text-blue-600 border-white' : 'bg-white/10 text-white border-white/10'">
+                class="flex flex-col items-center opacity-70 transition-all"
+                :class="{'opacity-100 scale-110': currentTab === tab.id}">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-white/10 border border-white/20"
+                     :class="{'bg-white text-blue-600': currentTab === tab.id}">
                     <i :class="tab.icon"></i>
                 </div>
-                <span class="text-[9px] font-bold mt-2 tracking-wider uppercase">{{ tab.name }}</span>
+                <span class="text-[10px] font-bold mt-2 uppercase">{{ tab.name }}</span>
             </button>
         </nav>
     </header>
 
-    <main class="flex-1 -mt-16 px-4 pb-10 z-20 overflow-y-auto">
+    <main class="flex-1 -mt-12 px-4 pb-10 z-20 overflow-y-auto">
         
-        <div v-if="currentTab === 'outline'" class="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
-            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                <span class="w-1.5 h-6 bg-blue-500 rounded-full mr-3"></span>
-                Course Blueprint
-            </h2>
-            <div class="space-y-4">
-                <div class="relative pl-4 border-l-2 border-blue-200">
-                    <span class="text-[10px] font-bold text-blue-500 uppercase">Overview</span>
-                    <h3 class="font-bold text-gray-800 text-sm">Intro & Foundations (L1-L2)</h3>
-                    <p class="text-xs text-gray-500 mt-1">Analytics types, Supervised vs Unsupervised, Clustering, PCA.</p>
-                </div>
-                <div class="relative pl-4 border-l-2 border-green-200">
-                    <span class="text-[10px] font-bold text-green-500 uppercase">Models</span>
-                    <h3 class="font-bold text-gray-800 text-sm">Core Algorithms (L3, L5, L7)</h3>
-                    <p class="text-xs text-gray-500 mt-1">Linear/Logistic Regression, Decision Trees, Neural Networks.</p>
-                </div>
-                <div class="relative pl-4 border-l-2 border-purple-200">
-                    <span class="text-[10px] font-bold text-purple-500 uppercase">Methodology</span>
-                    <h3 class="font-bold text-gray-800 text-sm">Optimization (L4, L8)</h3>
-                    <p class="text-xs text-gray-500 mt-1">Bias-Variance, Regularization, Ensemble methods.</p>
-                </div>
-                <div class="relative pl-4 border-l-2 border-orange-200">
-                    <span class="text-[10px] font-bold text-orange-500 uppercase">Advanced</span>
-                    <h3 class="font-bold text-gray-800 text-sm">Specialized Topics (L9, L10)</h3>
-                    <p class="text-xs text-gray-500 mt-1">Multi-Armed Bandits, CNNs for Image Processing.</p>
-                </div>
+        <div v-if="currentTab === 'outline'" class="bg-white rounded-3xl shadow p-6 mb-20">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-l-4 border-blue-500 pl-3">Course Structure</h2>
+            <div v-for="item in outlineData" :key="item.category" class="mb-4">
+                <span class="text-xs font-bold text-blue-600 uppercase">{{ item.category }}</span>
+                <h3 class="font-bold text-gray-800">{{ item.topic }}</h3>
+                <p class="text-xs text-gray-500">{{ item.details }}</p>
             </div>
         </div>
 
-        <div v-if="currentTab === 'notes'" class="space-y-4">
-            <div class="bg-white rounded-3xl shadow-sm p-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-100/50 backdrop-blur-md bg-white/90">
-                <h2 class="text-lg font-bold text-gray-800 pl-2">Lecture Notes</h2>
-                <div class="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Detailed</div>
-            </div>
-
-            <div v-for="(note, index) in notesData" :key="index" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div @click="note.isOpen = !note.isOpen" class="p-5 flex justify-between items-center cursor-pointer hover:bg-gray-50">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm shadow-sm">{{ note.id }}</div>
-                        <h3 class="font-bold text-gray-800 text-sm">{{ note.title }}</h3>
-                    </div>
-                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300" :class="{'rotate-180': note.isOpen}"></i>
+        <div v-if="currentTab === 'notes'" class="space-y-4 mb-20">
+            <div v-for="(note, idx) in notesData" :key="idx" class="bg-white rounded-2xl shadow overflow-hidden">
+                <div @click="note.isOpen = !note.isOpen" class="p-4 flex justify-between items-center cursor-pointer bg-white">
+                    <span class="font-bold text-gray-800 text-sm">{{ note.id }}: {{ note.title }}</span>
+                    <i class="fas fa-chevron-down text-gray-400" :class="{'rotate-180': note.isOpen}"></i>
                 </div>
-                <div v-if="note.isOpen" class="px-5 pb-6 bg-gray-50/50 border-t border-gray-100">
-                    <ul class="space-y-4 mt-4">
-                        <li v-for="(point, pIndex) in note.points" :key="pIndex" class="flex items-start text-sm text-gray-700 leading-relaxed">
-                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                            <span v-html="point"></span>
-                        </li>
+                <div v-if="note.isOpen" class="px-4 pb-4 bg-gray-50 text-sm text-gray-600 border-t">
+                    <ul class="list-disc ml-4 mt-2 space-y-2">
+                        <li v-for="p in note.points" v-html="p"></li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <div v-if="currentTab === 'bank'" class="space-y-4">
-            <div class="sticky top-0 z-30 pt-2 pb-2 -mx-4 px-4 bg-gray-50/95 backdrop-blur-sm border-b border-gray-200">
-                <div class="flex overflow-x-auto hide-scrollbar gap-2 pb-1">
-                    <button @click="bankFilter = 'All'" class="px-4 py-2 rounded-xl text-xs font-bold border transition-all" :class="bankFilter === 'All' ? 'bg-gray-800 text-white' : 'bg-white text-gray-500 border-gray-200'">All</button>
-                    <button @click="bankFilter = 'Practice'" class="px-4 py-2 rounded-xl text-xs font-bold border transition-all" :class="bankFilter === 'Practice' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-500 border-gray-200'">Practice</button>
-                    <button v-for="lec in lecturesList" :key="lec" @click="bankFilter = lec" class="px-4 py-2 rounded-xl text-xs font-bold border whitespace-nowrap transition-all" :class="bankFilter === lec ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 border-gray-200'">{{ lec }}</button>
-                </div>
+        <div v-if="currentTab === 'bank'" class="space-y-4 mb-20">
+            <div class="flex gap-2 overflow-x-auto pb-2">
+                <button v-for="filter in ['All', 'Practice', 'L1', 'L2', 'L3', 'L4', 'L5', 'L7', 'L8', 'L9', 'L10']" 
+                    @click="bankFilter = filter"
+                    class="px-3 py-1 rounded-full text-xs font-bold border whitespace-nowrap transition-colors"
+                    :class="bankFilter === filter ? 'bg-blue-600 text-white' : 'bg-white text-gray-500'">
+                    {{ filter }}
+                </button>
             </div>
 
-            <div v-if="filteredQuestions.length > 0">
-                <div v-for="(q, index) in filteredQuestions" :key="index" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="text-[10px] font-bold px-2 py-1 rounded text-white tracking-wide" :class="q.source === 'Practice' ? 'bg-emerald-500' : 'bg-blue-500'">{{ q.category }}</span>
-                        </div>
-                        <p class="font-bold text-gray-800 text-sm leading-relaxed mb-4">{{ q.question }}</p>
-                        
-                        <div class="space-y-2 mb-2">
-                            <button v-for="(opt, oIdx) in q.options" :key="oIdx" 
-                                 @click="handleBankSelection(q, opt)"
-                                 :disabled="q.userSelected !== null"
-                                 class="w-full text-left text-xs px-4 py-3 rounded-xl opt-btn relative"
-                                 :class="getBankClass(q, opt)">
-                                <div class="flex justify-between items-center">
-                                    <span>{{ opt }}</span>
-                                    <i v-if="q.userSelected !== null && opt === q.answer" class="fas fa-check"></i>
-                                    <i v-if="q.userSelected === opt && opt !== q.answer" class="fas fa-times"></i>
-                                </div>
-                            </button>
-                        </div>
-                        
-                        <div v-if="q.userSelected !== null" class="mt-3 p-3 bg-gray-50 rounded-lg text-xs text-gray-600 border border-gray-200">
-                            <div v-if="q.userSelected !== q.answer" class="text-red-600 font-bold mb-1"><i class="fas fa-exclamation-circle mr-1"></i> Added to Mistakes</div>
-                            <div class="font-bold text-gray-800 mb-1">Correct Answer: {{ q.answer }}</div>
-                            <div v-if="q.explanation">{{ q.explanation }}</div>
-                        </div>
-                    </div>
+            <div v-for="(q, idx) in filteredQuestions" :key="idx" class="bg-white rounded-2xl shadow p-5">
+                <div class="flex justify-between mb-2">
+                    <span class="text-[10px] font-bold px-2 py-1 rounded text-white" 
+                          :class="q.source === 'Practice' ? 'bg-green-500' : 'bg-blue-500'">
+                        {{ q.category }}
+                    </span>
                 </div>
-            </div>
-            <div v-else class="text-center py-20 text-gray-400 text-sm">No questions found.</div>
-        </div>
-
-        <div v-if="currentTab === 'mistakes'" class="space-y-4">
-            <div class="bg-white rounded-3xl shadow-sm p-6 text-center border-b border-gray-100" v-if="mistakes.length === 0">
-                <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto text-green-500 text-3xl mb-4"><i class="fas fa-check"></i></div>
-                <h2 class="text-lg font-bold text-gray-800">Clean Sheet!</h2>
-                <p class="text-xs text-gray-500 mt-1">No mistakes yet. Go practice!</p>
-            </div>
-            <div v-else>
-                <div class="flex justify-between items-center mb-4 px-2">
-                    <h2 class="text-lg font-bold text-gray-800">Review Mistakes</h2>
-                    <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">{{ mistakes.length }} items</span>
-                </div>
-                <div v-for="(q, index) in mistakes" :key="index" class="bg-white rounded-2xl shadow-sm border-l-4 border-red-400 overflow-hidden mb-4 p-5">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase mb-2 block">{{ q.category }}</span>
-                    <p class="font-bold text-gray-800 text-sm leading-relaxed mb-4">{{ q.question }}</p>
-                    <div class="space-y-2">
-                        <button v-for="(opt, oIdx) in q.options" :key="oIdx" 
-                            @click="solveMistake(index, opt, q.answer)"
-                            class="w-full text-left text-xs px-4 py-3 rounded-lg border hover:bg-gray-50 transition-colors">
-                            {{ opt }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div v-if="currentTab === 'quiz'" class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 min-h-[550px] flex flex-col justify-center relative overflow-hidden">
-            
-            <div v-if="quizState === 'start'" class="text-center z-10">
-                <div class="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-blue-600 text-6xl mb-6 shadow-inner"><i class="fas fa-robot"></i></div>
-                <h2 class="text-2xl font-extrabold text-gray-800 mb-2">AI Quiz</h2>
-                <p class="text-gray-500 text-sm mb-8 px-4">10 random questions based on your lecture material.</p>
-                <button @click="startQuiz" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform">Start</button>
-            </div>
-
-            <div v-if="quizState === 'playing'" class="flex-1 flex flex-col z-10">
-                <div class="flex justify-between items-center mb-6">
-                    <span class="text-xs text-gray-400 font-bold uppercase">Q {{ currentQuestionIndex + 1 }}/10</span>
-                    <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">Score: {{ score }}</span>
-                </div>
+                <p class="font-bold text-gray-800 text-sm mb-3">{{ q.question }}</p>
                 
-                <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6">
-                    <span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">{{ currentQuizQuestion.topic || 'Concept Check' }}</span>
-                    <h3 class="text-sm font-bold text-gray-800 leading-relaxed">{{ currentQuizQuestion.question }}</h3>
-                </div>
-                
-                <div class="space-y-3 flex-1">
-                    <button v-for="(opt, idx) in currentQuizQuestion.options" :key="idx"
-                        @click="handleQuizAnswer(opt)"
-                        :class="getQuizClass(opt)"
-                        :disabled="hasAnswered"
-                        class="w-full text-left p-4 rounded-xl border-2 text-xs font-medium transition-all duration-200 relative">
+                <div class="space-y-2">
+                    <button v-for="opt in q.options" 
+                        @click="checkBankAnswer(q, opt)"
+                        class="w-full text-left text-xs px-4 py-3 rounded-lg border transition-colors"
+                        :class="getBankClass(q, opt)">
                         {{ opt }}
                     </button>
                 </div>
+                
+                <div v-if="q.userSelected" class="mt-3 p-3 bg-gray-50 rounded border text-xs">
+                    <strong>Correct:</strong> {{ q.answer }}
+                    <div v-if="q.explanation" class="text-gray-500 mt-1">{{ q.explanation }}</div>
+                </div>
+            </div>
+            <div v-if="filteredQuestions.length === 0" class="text-center py-10 text-gray-400 text-sm">No questions found.</div>
+        </div>
 
-                <div v-if="hasAnswered" class="mt-6">
-                    <div v-if="!isCorrect" class="p-3 bg-red-50 border-l-4 border-red-500 text-xs text-red-800 mb-4 rounded-r-xl">
-                        <i class="fas fa-save mr-1"></i> Saved to Mistakes.
-                        <div class="mt-1"><strong>Correct:</strong> {{ currentQuizQuestion.answer }}</div>
-                        <div class="mt-1 opacity-80">{{ currentQuizQuestion.explanation }}</div>
-                    </div>
-                    <div v-else class="p-3 bg-green-50 border-l-4 border-green-500 text-xs text-green-800 mb-4 rounded-r-xl"><strong>Correct!</strong> {{ currentQuizQuestion.explanation }}</div>
-                    <button @click="nextQuestion" class="w-full bg-gray-900 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">{{ currentQuestionIndex < 9 ? 'Next' : 'Finish' }}</button>
+        <div v-if="currentTab === 'mistakes'" class="space-y-4 mb-20">
+            <div v-if="mistakes.length === 0" class="bg-white rounded-2xl p-8 text-center shadow">
+                <h2 class="text-xl font-bold text-green-500">Clean Sheet!</h2>
+                <p class="text-xs text-gray-400">No mistakes yet.</p>
+            </div>
+            <div v-else v-for="(q, idx) in mistakes" :key="idx" class="bg-white rounded-2xl shadow border-l-4 border-red-500 p-5">
+                <span class="text-[10px] font-bold text-gray-400 uppercase">{{ q.category }}</span>
+                <p class="font-bold text-gray-800 text-sm my-2">{{ q.question }}</p>
+                <div class="space-y-2">
+                    <button v-for="opt in q.options" @click="solveMistake(idx, opt, q.answer)" 
+                        class="w-full text-left text-xs p-3 border rounded hover:bg-gray-50">
+                        {{ opt }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="currentTab === 'quiz'" class="bg-white rounded-3xl shadow p-6 min-h-[400px] flex flex-col justify-center text-center">
+            <div v-if="quizState === 'start'">
+                <div class="text-5xl mb-4">🤖</div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">AI Quiz</h2>
+                <p class="text-gray-500 text-xs mb-6">10 Random Questions</p>
+                <button @click="startQuiz" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow">Start</button>
+            </div>
+            
+            <div v-if="quizState === 'playing'" class="text-left">
+                <div class="flex justify-between mb-4 text-xs font-bold text-gray-500">
+                    <span>Q {{ currentQuestionIndex + 1 }}/10</span>
+                    <span>Score: {{ score }}</span>
+                </div>
+                <p class="font-bold text-gray-800 mb-4 text-sm">{{ currentQuizQuestion.question }}</p>
+                <div class="space-y-2">
+                    <button v-for="opt in currentQuizQuestion.options" 
+                        @click="checkQuizAnswer(opt)" :disabled="hasAnswered"
+                        class="w-full text-left text-xs p-3 rounded border transition-colors" 
+                        :class="getQuizClass(opt)">
+                        {{ opt }}
+                    </button>
+                </div>
+                <div v-if="hasAnswered" class="mt-4">
+                     <p v-if="!isCorrect" class="text-xs text-red-500 font-bold mb-2">Wrong! Correct: {{ currentQuizQuestion.answer }}</p>
+                     <button @click="nextQuestion" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold text-xs">Next</button>
                 </div>
             </div>
 
-            <div v-if="quizState === 'result'" class="text-center z-10">
-                <div class="text-6xl mb-4">{{ score >= 6 ? '🎉' : '💪' }}</div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-1">Done!</h2>
-                <p class="text-gray-500 text-sm mb-6">Score: {{ score }} / 10</p>
-                <button @click="startQuiz" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg mb-2">New Quiz</button>
+            <div v-if="quizState === 'result'">
+                <h2 class="text-3xl font-bold text-blue-600 mb-2">{{ score }}/10</h2>
+                <p class="text-xs text-gray-500 mb-6">Quiz Complete</p>
+                <button @click="startQuiz" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow">New Quiz</button>
             </div>
         </div>
 
@@ -247,294 +160,188 @@
     const app = Vue.createApp({
         data() {
             return {
-                currentTab: 'outline',
+                currentTab: 'bank', // Default to Bank to verify visibility
                 tabs: [
-                    { id: 'outline', name: 'Outline', icon: 'fas fa-list-ul' },
-                    { id: 'notes', name: 'Notes', icon: 'fas fa-book-open' },
+                    { id: 'outline', name: 'Outline', icon: 'fas fa-list' },
+                    { id: 'notes', name: 'Notes', icon: 'fas fa-book' },
                     { id: 'bank', name: 'Bank', icon: 'fas fa-layer-group' },
                     { id: 'mistakes', name: 'Mistakes', icon: 'fas fa-exclamation-triangle' },
-                    { id: 'quiz', name: 'AI Quiz', icon: 'fas fa-robot' },
+                    { id: 'quiz', name: 'AI Quiz', icon: 'fas fa-robot' }
                 ],
                 bankFilter: 'All',
-                lecturesList: ["L1 Intro", "L2 Cluster", "L3 Reg", "L3 Logistic", "L4 Method", "L4 Reg", "L5 Tree", "L7 ANN", "L8 Ensemble", "L9 MAB", "L10 CNN"],
-                mistakes: JSON.parse(localStorage.getItem('infs_mistakes_v3') || '[]'),
+                mistakes: JSON.parse(localStorage.getItem('infs_mistakes_v4') || '[]'),
                 
-                // Quiz State
+                // DATA: Outline
+                outlineData: [
+                    { category: "Overview", topic: "Model Landscape", details: "Supervised vs Unsupervised vs RL." },
+                    { category: "Regression", topic: "Linear & Regularization", details: "MSE, RMSE, R². Lasso vs Ridge." },
+                    { category: "Classify", topic: "Logit & Trees", details: "Odds Ratio, Gini, Entropy, Pruning." },
+                    { category: "Deep ML", topic: "ANN & CNN", details: "Backprop, Activation, Filters." }
+                ],
+
+                // DATA: Notes
+                notesData: [
+                    { id: "L1", title: "Intro & ML Types", isOpen: false, points: ["<b>Supervised:</b> Target Y (Reg/Class).", "<b>Unsupervised:</b> No Target.", "<b>RL:</b> Rewards (MAB)."] },
+                    { id: "L2", title: "Clustering & PCA", isOpen: false, points: ["<b>K-Means:</b> Random centroids.", "<b>PCA:</b> PC1 max variance."] },
+                    { id: "L3", title: "Regression", isOpen: false, points: ["<b>Linear:</b> R² explains variance.", "<b>Logistic:</b> Logit = log(p/1-p)."] },
+                    { id: "L4", title: "Regularization", isOpen: false, points: ["<b>Bias-Variance:</b> Simple=Bias, Complex=Variance.", "<b>Lasso:</b> Feature selection."] },
+                    { id: "L5", title: "Trees", isOpen: false, points: ["<b>Splitting:</b> Gini/Entropy.", "<b>Pruning:</b> Stop overfitting."] },
+                    { id: "L7", title: "ANN", isOpen: false, points: ["<b>Activation:</b> ReLU/Sigmoid.", "<b>Backprop:</b> Update weights."] },
+                    { id: "L8", title: "Ensemble", isOpen: false, points: ["<b>Bagging:</b> RF (Variance).", "<b>Boosting:</b> AdaBoost (Bias)."] },
+                    { id: "L9", title: "MAB", isOpen: false, points: ["<b>Explore vs Exploit:</b> E-Greedy, Thompson."] },
+                    { id: "L10", title: "CNN", isOpen: false, points: ["<b>Conv:</b> Features.", "<b>Pool:</b> Downsample."] }
+                ],
+
+                // DATA: Question Bank (FULL)
+                allQuestions: [
+                    { src: "Practice", cat: "General", q: "Which describes underfitting?", a: "Low variance and high bias", opts: ["High variance and high bias", "High variance and low bias", "Low variance and high bias", "Low variance and low bias"] },
+                    { src: "Practice", cat: "L4", q: "Ridge regularization helps by?", a: "Increasing bias a bit and reduce variance", opts: ["Reducing bias and variance", "Increasing bias a bit and reduce variance", "Reducing bias only", "Increasing variance only"] },
+                    { src: "Practice", cat: "L4", q: "Training set's R² with complexity?", a: "It always goes up", opts: ["Goes down then up", "Goes up then down", "Always goes down", "Always goes up"] },
+                    { src: "Practice", cat: "L4", q: "Purpose of validation set?", a: "Prevents overfitting and helps in hyperparameter tuning", opts: ["Helps memorize data", "Prevents overfitting and helps in hyperparameter tuning", "Testing final model", "Increases training size"] },
+                    { src: "Practice", cat: "L3", q: "Target y is binary (30% 0, 70% 1). Predict all 1. Training accuracy?", a: "70%", opts: ["30%", "70%", "50%", "Depends"] },
+                    { src: "Practice", cat: "L3", q: "Logistic Regression used for?", a: "Binary classification problems", opts: ["Regression", "MAB", "Binary classification problems", "Clustering"] },
+                    { src: "Practice", cat: "L5", q: "C5.0 prevents favoritism via?", a: "Information gain ratio", opts: ["Random noise", "Equal chance", "Information gain ratio", "Favors binary inputs"] },
+                    { src: "Practice", cat: "L7", q: "FALSE about neural networks?", a: "Highly interpretable", opts: ["Highly interpretable", "Require large labelled data", "Computationally heavy", "Prone to overfitting"] },
+                    { src: "Practice", cat: "L8", q: "TRUE about AdaBoost?", a: "Adapts to mistakes of previous models", opts: ["Equal weight", "Less sensitive to noise", "Single complex model", "Adapts to mistakes of previous models"] },
+                    { src: "Practice", cat: "L9", q: "TRUE about exploration-exploitation?", a: "Balancing helps discover best arm over time", opts: ["Balancing helps discover best arm over time", "Max exploration best", "Exploitation random", "Exploration immediate"] },
+                    
+                    { src: "Kahoot", cat: "L1", q: "Tick all AI options.", a: "Self-driving car", opts: ["Calculator", "Computer", "Self-driving car", "Laundry Machine"] },
+                    { src: "Kahoot", cat: "L1", q: "Market segmentation is Supervised?", a: "False", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L1", q: "Series is 2D with 2 columns?", a: "False", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L1", q: "One column from DataFrame is Series?", a: "True", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L1", q: "Example of Topic Model?", a: "Find topics from updates", opts: ["Label updates +/-", "Find topics from updates"] },
+                    { src: "Kahoot", cat: "L1", q: "Doc-term matrix is sparse?", a: "True", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L1", q: "Why truncate SVD?", a: "Keep only top-ranked topics", opts: ["Find all topics", "Keep only top-ranked topics"] },
+                    { src: "Kahoot", cat: "L1", q: "GPT stands for?", a: "Generative Pre-trained Transformer", opts: ["Guide", "Generative Pre-trained Transformer"] },
+
+                    { src: "Kahoot", cat: "L2", q: "FALSE about clustering?", a: "Two clusters can have common observations", opts: ["Subset", "Union is entire set", "Two clusters can have common observations", "Within cluster similar"] },
+                    { src: "Kahoot", cat: "L2", q: "Segmentation by Age/Gender is clustering?", a: "False", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L2", q: "FALSE about Euclidean?", a: "No variable can dominate", opts: ["No variable can dominate", "Sqrt sum squared", "Scaling needed", "Categorical overshadow"] },
+                    { src: "Kahoot", cat: "L2", q: "Complete linkage measures minimum?", a: "False", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L2", q: "FALSE about Agglomerative?", a: "Final outcome is one cluster regardless of threshold", opts: ["Merges hierarchically", "Expensive", "Various linkages", "Final outcome is one cluster regardless of threshold"] },
+                    { src: "Kahoot", cat: "L2", q: "FALSE about K-Means?", a: "If start with K=3, might end with 2 clusters", opts: ["We start with randomly selected K centroids", "Assign nearest", "If start with K=3, might end with 2 clusters", "Stop when no change"] },
+                    { src: "Kahoot", cat: "L2", q: "Silhouette Score NOT about?", a: "Whether each observation is in right cluster", opts: ["Cohesion", "Separation", "Whether each observation is in right cluster"] },
+                    { src: "Kahoot", cat: "L2", q: "Principal Components usually cannot be interpreted.", a: "True", opts: ["True", "False"] },
+
+                    { src: "Kahoot", cat: "L3", q: "FALSE about linear reg?", a: "Beta0 is gradient", opts: ["y is target", "x is input", "Beta0 is intercept", "Beta0 is gradient"] },
+                    { src: "Kahoot", cat: "L3", q: "FALSE about MLR/R²?", a: "If R² higher, model definitely better", opts: ["Ceteris paribus", "If R² higher, model definitely better", "R² increases with vars", "No constant input"] },
+                    { src: "Kahoot", cat: "L3", q: "Positive coeff means y/xi correlated?", a: "False", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L3", q: "Coeff for vertical height diff (dummy)?", a: "Beta1", opts: ["Beta0", "Beta1", "Beta2", "y"] },
+                    { src: "Kahoot", cat: "L3", q: "10 values need how many dummies?", a: "9", opts: ["8", "9", "10", "11"] },
+                    { src: "Kahoot", cat: "L3", q: "FALSE about train/test?", a: "Testing set should be bigger", opts: ["Train known target", "Testing set should be bigger", "Test hidden target", "Test not for training"] },
+                    { src: "Kahoot", cat: "L3", q: "Logistic Reg suitable for classifier?", a: "True", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L3", q: "Odds of coin head (70%)?", a: "7/3", opts: ["3/7", "1", "7/3", "0"] },
+                    { src: "Kahoot", cat: "L3", q: "Sum equals 1?", a: "TPR + FNR", opts: ["TPR + FPR", "TNR + FNR", "TPR + FNR", "Precision + TPR"] },
+                    { src: "Kahoot", cat: "L3", q: "Optimize Recall for?", a: "Earthquake prediction", opts: ["YouTube ad", "Earthquake prediction"] },
+
+                    { src: "Kahoot", cat: "L4", q: "Low Bias High Variance?", a: "Complex model; overfitting", opts: ["Complex model; overfitting", "Complex; underfitting", "Simple; underfitting", "Simple; overfitting"] },
+                    { src: "Kahoot", cat: "L4", q: "Min observations for 5 terms?", a: "50", opts: ["30", "40", "50", "60"] },
+                    { src: "Kahoot", cat: "L4", q: "If alpha large, coeffs limited?", a: "True", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L4", q: "Regularization sparse coeffs?", a: "LASSO", opts: ["LASSO", "Ridge"] },
+                    { src: "Kahoot", cat: "L4", q: "FALSE about train-val-test?", a: "Validation set can only be used once", opts: ["Test once", "Test diverse", "Validation set can only be used once for training", "Validation fine-tune"] },
+                    { src: "Kahoot", cat: "L4", q: "Leave-one-out CV for small data?", a: "True", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L4", q: "Area unit increases (sqm->sqft). Implication?", a: "Value goes up; less penalty on coefficient", opts: ["Value down; less penalty", "Value up; more penalty", "Value down; more penalty", "Value goes up; less penalty on coefficient"] },
+                    { src: "Kahoot", cat: "L4", q: "Big datasets prefer complex?", a: "True", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L4", q: "If y 90% True, model predicts False?", a: "False", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L4", q: "NOT purpose of regularization?", a: "Find perfect model for training", opts: ["Address overfitting", "Prevent complex", "Reduce coeff", "Find perfect model for training"] },
+
+                    { src: "Kahoot", cat: "L5", q: "FALSE about decision trees?", a: "Deep trees less likely to overfit", opts: ["Feature selection", "Handle numeric/cat", "Deep trees less likely to overfit", "Split on impurity"] },
+                    { src: "Kahoot", cat: "L5", q: "Correct interpretation of Gini?", a: "Measures randomness / impurity", opts: ["Nodes created", "Measures randomness / impurity", "Total error", "Leaves count"] },
+                    { src: "Kahoot", cat: "L5", q: "TRUE about entropy?", a: "Equals 0 when node is pure", opts: ["Always negative", "Equals 0 when node is pure", "Increases when purer", "Unrelated to gain"] },
+                    { src: "Kahoot", cat: "L5", q: "Technique to prevent overfitting in trees?", a: "Pruning", opts: ["Increasing depth", "Adding variables", "Pruning", "Increasing leaves"] },
+                    { src: "Kahoot", cat: "L5", q: "FALSE about Random Forest?", a: "Uses boosting", opts: ["Uses bagging", "Reduces variance", "Uses boosting", "Multiple trees"] },
+                    { src: "Kahoot", cat: "L5", q: "Feature bagging in RF?", a: "Using random subset of features", opts: ["All features", "Using random subset of features", "PCA", "Removing correlated"] },
+                    { src: "Kahoot", cat: "L5", q: "TRUE for decision trees?", a: "Very interpretable", opts: ["Very interpretable", "Heavy preprocessing", "Only classification", "No missing values"] },
+                    { src: "Kahoot", cat: "L5", q: "Tree grows too deep?", a: "Model overfits", opts: ["Underfits", "Generalizes", "Model overfits", "No change"] },
+
+                    { src: "Kahoot", cat: "L7", q: "Activation function outputting 0 to 1?", a: "Sigmoid", opts: ["ReLU", "Sigmoid", "Tanh", "Linear"] },
+                    { src: "Kahoot", cat: "L7", q: "TRUE about neural networks?", a: "Require activation for non-linearity", opts: ["Cannot model non-linear", "Require activation for non-linearity", "Only for images", "Always outperform"] },
+                    { src: "Kahoot", cat: "L7", q: "Backpropagation used for?", a: "Updating weights", opts: ["Evaluation", "Updating weights", "Increasing data", "Missing values"] },
+                    { src: "Kahoot", cat: "L7", q: "Disadvantage of neural networks?", a: "Require large datasets", opts: ["Interpretable", "Require large datasets", "Always converge", "No tuning"] },
+                    { src: "Kahoot", cat: "L7", q: "Example of hyperparameter?", a: "Learning rate", opts: ["Weight", "Bias", "Learning rate", "Activation output"] },
+                    { src: "Kahoot", cat: "L7", q: "Overfitting in ANN?", a: "Training loss Down, Test loss Up", opts: ["Train Down Test Down", "Training loss Down, Test loss Up", "Train Up Test Down", "Train Up Test Up"] },
+
+                    { src: "Kahoot", cat: "L8", q: "TRUE about ensemble?", a: "Combine predictions from multiple models", opts: ["Always reduce variance", "Combine predictions from multiple models", "Always reduce bias", "Interpretability"] },
+                    { src: "Kahoot", cat: "L8", q: "Which is boosting?", a: "XGBoost", opts: ["Random Forest", "XGBoost", "Bagging", "Feature selection"] },
+                    { src: "Kahoot", cat: "L8", q: "Bagging models trained on?", a: "Random samples with replacement", opts: ["Identical data", "Random samples with replacement", "Without replacement", "Only misclassified"] },
+                    { src: "Kahoot", cat: "L8", q: "Main idea of boosting?", a: "Reduce bias by improving weak learners", opts: ["Deep trees", "Reduce bias by improving weak learners", "Parallel models", "Remove correlated"] },
+                    { src: "Kahoot", cat: "L8", q: "NOT an ensemble?", a: "Normalization", opts: ["Stacking", "Boosting", "Bagging", "Normalization"] },
+                    { src: "Kahoot", cat: "L8", q: "TRUE about XGBoost?", a: "Uses gradient boosting", opts: ["Pruning main", "Uses gradient boosting", "Outperforms RF", "No missing values"] },
+
+                    { src: "Kahoot", cat: "L9", q: "Why MAB better for YouTube?", a: "MAB adaptively displays", opts: ["Diverse", "MAB adaptively displays", "Efficient"] },
+                    { src: "Kahoot", cat: "L9", q: "Random Pull favors best arm?", a: "False", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L9", q: "Fixed epsilon means exploration goes down?", a: "False", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L9", q: "As n -> infinity, posterior closer to truth?", a: "True", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L9", q: "Likelihood of choosing Arm 2 (Green) vs Arm 3 (Red)?", a: "Very likely", opts: ["Unlikely", "Very likely", "Unlikely < Arm 1", "Equal"] },
+                    { src: "Kahoot", cat: "L9", q: "Exploration maximizes immediate rewards?", a: "False", opts: ["True", "False"] },
+
+                    { src: "Kahoot", cat: "L10", q: "Semantic vs Instance Segmentation same?", a: "False", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L10", q: "Why CNN superior?", a: "Capture local spatial patterns", opts: ["Capture local spatial patterns", "Less computation", "Time series", "Interpretability"] },
+                    { src: "Kahoot", cat: "L10", q: "Purpose of convolution?", a: "Feature extraction", opts: ["Non-linear", "Regularization", "Feature extraction", "Dim reduction"] },
+                    { src: "Kahoot", cat: "L10", q: "Activation adds non-linearity?", a: "True", opts: ["True", "False"] },
+                    { src: "Kahoot", cat: "L10", q: "Purpose of pooling?", a: "Dimension reduction", opts: ["Feature extraction", "Non-linear", "Dimension reduction", "Regularization"] }
+                ],
+                
+                // Quiz
                 quizState: 'start',
                 quizQuestions: [],
                 currentQuestionIndex: 0,
                 score: 0,
                 hasAnswered: false,
                 isCorrect: false,
-                currentQuizQuestion: {},
-
-                // NOTES DATA (Full Content from infs.docx)
-                notesData: [
-                    { 
-                        id: "L1", title: "Introduction", isOpen: false, 
-                        points: [
-                            "<b>4 Types of Analytics:</b> <br>1. Descriptive (What happened? summary). <br>2. Diagnostic (Why did it happen? root cause). <br>3. Predictive (What will happen? forecasting). <br>4. Prescriptive (What should we do? optimization). <br>Note: Predictive is the core of this course.",
-                            "<b>AI Hierarchy:</b> AI (Broadest) > Machine Learning (subset of AI) > Deep Learning (subset of ML, uses multi-layer ANN). DL extracts features automatically.",
-                            "<b>3 Types of ML:</b> <br>1. Supervised: Has Label/Target Y. (Reg/Class). <br>2. Unsupervised: No Label. (Clustering/PCA). <br>3. Reinforcement: Rewards/Trial & Error. (MAB).",
-                            "<b>Data Splitting:</b> <br>- Training: Fit model parameters. <br>- Validation: Tune hyperparameters. <br>- Test: Final evaluation ONLY. No tuning."
-                        ] 
-                    },
-                    { 
-                        id: "L2", title: "Clustering & PCA", isOpen: false, 
-                        points: [
-                            "<b>Clustering Goal:</b> Minimize intra-cluster distance (cohesion), Maximize inter-cluster distance (separation).",
-                            "<b>Scaling:</b> Crucial because Euclidean distance is sensitive to scale. Standardization (Z-score) is preferred.",
-                            "<b>Hierarchical:</b> Agglomerative (Bottom-up). Visualized by Dendrogram. Good: No fixed K. Bad: Slow for big data.",
-                            "<b>K-Means:</b> 1. Pick K. 2. Init Centroids. 3. Assign points. 4. Update Centroids. <br>Bad: Sensitive to outliers/initialization, only spherical clusters.",
-                            "<b>Silhouette Score:</b> Measures quality. Close to 1 (Good), 0 (Overlapping), Negative (Wrong cluster).",
-                            "<b>PCA:</b> Unsupervised Dim Reduction. New axes (Principal Components). PC1 max variance. PC2 orthogonal to PC1."
-                        ] 
-                    },
-                    { 
-                        id: "L3", title: "Linear & Logistic Reg", isOpen: false, 
-                        points: [
-                            "<b>Linear Regression:</b> Continuous Y. <br>- R²: Variance explained (always increases with more vars). <br>- Multicollinearity: Unstable coefficients. Fix: Remove vars, PCA, Regularization.",
-                            "<b>Logistic Regression:</b> Binary Y (0/1). <br>- Function: Sigmoid (S-curve). <br>- <b>Logit:</b> log(p/1-p). Logit is LINEAR to X. <br>- <b>Odds Ratio:</b> exp(beta). If X increases by 1 unit, Odds multiply by OR.",
-                            "<b>Metrics:</b> <br>- Precision: TP / (TP+FP) (Quality). <br>- Recall: TP / (TP+FN) (Quantity). <br>- F1: Harmonic mean. <br>- AUC/ROC: Measure separability (0.5 is random, 1.0 is perfect)."
-                        ] 
-                    },
-                    { 
-                        id: "L4", title: "Regularization & Method", isOpen: false, 
-                        points: [
-                            "<b>Bias-Variance Tradeoff:</b> <br>- Simple Model = High Bias (Underfit). <br>- Complex Model = High Variance (Overfit). <br>- Goal: Low Total Error (U-shape).",
-                            "<b>Regularization:</b> Penalize large coefficients. <br>- <b>Ridge (L2):</b> Penalty sum(beta²). Shrinks coeff near 0. <br>- <b>Lasso (L1):</b> Penalty sum|beta|. Shrinks to EXACTLY 0 (Feature Selection).",
-                            "<b>Imbalanced Data:</b> Accuracy is misleading. Use Precision/Recall. Fixes: Oversampling, Undersampling, Weighting loss.",
-                            "<b>Learning Curves:</b> High Bias (Train & Val error both high). High Variance (Gap between Train & Val)."
-                        ] 
-                    },
-                    { 
-                        id: "L5", title: "Decision Trees", isOpen: false, 
-                        points: [
-                            "<b>Mechanism:</b> Recursive Binary Splitting (Greedy). Interpretable (Rules). Handles non-linear & interactions.",
-                            "<b>Split Metrics:</b> <br>- Classification: Gini Impurity or Entropy. Goal: Maximize purity. <br>- Regression: SSE (Sum Squared Errors).",
-                            "<b>Pruning:</b> Essential to prevent overfitting. Trees tend to grow too deep/complex.",
-                            "<b>C4.5/C5.0:</b> Uses <b>Information Gain Ratio</b> to fix bias towards variables with many levels/branches."
-                        ] 
-                    },
-                    { 
-                        id: "L7", title: "ANN", isOpen: false, 
-                        points: [
-                            "<b>Structure:</b> Input -> Hidden Layer(s) -> Output. Mimics biological neurons.",
-                            "<b>Activation Function:</b> (Sigmoid, Tanh, ReLU). Introduces <b>Non-linearity</b>. Without this, Deep NN = Linear Regression.",
-                            "<b>Backpropagation:</b> The learning algorithm. <br>1. Calc prediction error. <br>2. Propagate error backwards (Chain Rule). <br>3. Update weights (Gradient Descent).",
-                            "<b>Cons:</b> Black box, slow training, data hungry."
-                        ] 
-                    },
-                    { 
-                        id: "L8", title: "Ensemble Models", isOpen: false, 
-                        points: [
-                            "<b>Concept:</b> Combine weak learners to make a strong one.",
-                            "<b>Bagging (Bootstrap Aggregating):</b> Train parallel models on random samples (with replacement). Reduces <b>Variance</b>. <br>Ex: <b>Random Forest</b> (Bagging + Random feature subset).",
-                            "<b>Boosting:</b> Train sequential models. Each corrects previous errors. Reduces <b>Bias</b>. <br>Ex: <b>AdaBoost</b> (Weights misclassified observations higher)."
-                        ] 
-                    },
-                    { 
-                        id: "L9", title: "Multi-Armed Bandits", isOpen: false, 
-                        points: [
-                            "<b>Problem:</b> Maximize cumulative reward from K arms with unknown probabilities. (RL).",
-                            "<b>Tradeoff:</b> Exploration (Try new/unknown) vs Exploitation (Stick to best known).",
-                            "<b>Strategies:</b> <br>- <b>E-Greedy:</b> Randomly explore with probability epsilon. <br>- <b>Thompson Sampling:</b> Bayesian approach. Sample from posterior (Beta) distributions. More intelligent."
-                        ] 
-                    },
-                    { 
-                        id: "L10", title: "CNN", isOpen: false, 
-                        points: [
-                            "<b>CNN:</b> For Grid data (Images). Preserves spatial relationships.",
-                            "<b>Convolution Layer:</b> Uses Filters (Kernels) to scan image. Extracts local features (edges, shapes).",
-                            "<b>Pooling Layer:</b> Downsampling (Max Pooling). Reduces dimension & provides translation invariance.",
-                            "<b>Structure:</b> Conv -> ReLU -> Pool -> Fully Connected (Classification)."
-                        ] 
-                    }
-                ],
-
-                // QUESTION BANK (Full content from files)
-                rawQuestions: [
-                     { src: "Practice", cat: "General", q: "Which describes underfitting?", a: "Low variance and high bias", opts: ["High variance and high bias", "High variance and low bias", "Low variance and high bias", "Low variance and low bias"] },
-                    { src: "Practice", cat: "L4 Reg", q: "How does Ridge regularization mitigate overfitting?", a: "Increase bias a bit and reduce variance", opts: ["Reduce bias and variance", "Increase bias a bit and reduce variance", "Reduce bias and increase variance", "Increase bias and variance"] },
-                    { src: "Practice", cat: "L4 Method", q: "How will training set's R² move as model complexity increases?", a: "It always goes up", opts: ["Goes down then up", "Goes up then down", "It always goes down", "It always goes up"] },
-                    { src: "Practice", cat: "L4 Method", q: "What is the purpose of validation set?", a: "It prevents overfitting and helps in hyperparameter tuning", opts: ["Helps memorize data", "It prevents overfitting and helps in hyperparameter tuning", "Testing final model", "Increases training size"] },
-                    { src: "Practice", cat: "L3 Metrics", q: "Target y is binary (30% 0, 70% 1). Predict all 1. Training accuracy?", a: "70%", opts: ["30%", "70%", "50%", "Depends"] },
-                    { src: "Practice", cat: "L3 Logistic", q: "Logistic Regression is commonly used for?", a: "Binary classification problems", opts: ["Regression", "MAB", "Binary classification problems", "Clustering"] },
-                    { src: "Practice", cat: "L5 Tree", q: "How does C5.0 prevent favoritism towards many split points?", a: "C5.0 uses information gain ratio", opts: ["Random noise", "Equal chance", "C5.0 uses information gain ratio", "Favors binary inputs"] },
-                    { src: "Practice", cat: "L7 ANN", q: "Which statement is FALSE about neural networks?", a: "Neural networks are highly interpretable", opts: ["Neural networks are highly interpretable", "Require large labelled data", "Computationally heavy", "Prone to overfitting"] },
-                    { src: "Practice", cat: "L8 Ensemble", q: "What is TRUE about AdaBoost?", a: "AdaBoost adapts to the mistakes of the previous component models", opts: ["Equal weight to all models", "Less sensitive to noise", "Trains single complex model", "AdaBoost adapts to the mistakes of the previous component models"] },
-                    { src: "Practice", cat: "L9 MAB", q: "TRUE about exploration-exploitation trade-off?", a: "Balancing exploration and exploitation helps in discovering the best-performing arm over time", opts: ["Balancing exploration and exploitation helps in discovering the best-performing arm over time", "Maximizing exploration leads to faster convergence", "Exploitation involves randomly selecting arms", "Exploration focuses on immediate rewards"] },
-
-                    // Kahoot L1
-                    { src: "Kahoot", cat: "L1 Intro", q: "Tick options representing Artificial Intelligence.", a: "Self-driving car", opts: ["Calculator", "Computer", "Self-driving car", "Laundry Machine"] },
-                    { src: "Kahoot", cat: "L1 Intro", q: "Market segmentation is a problem under Supervised Machine Learning.", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L1 Intro", q: "Series have index and actual data, so it is 2-dimensional.", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L1 Intro", q: "One column from a DataFrame is a Series.", a: "True", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L1 Intro", q: "What is an example of Topic Model?", a: "Find topics from Australian Gov's updates in the past year", opts: ["Label updates as positive or negative", "Find topics from Australian Gov's updates in the past year"] },
-                    { src: "Kahoot", cat: "L1 Intro", q: "Document-term matrix is normally sparse and have many zeros.", a: "True", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L1 Intro", q: "Why do we truncate the Singular Value Decomposition (SVD)?", a: "To keep only a few top-ranked topics", opts: ["To find all potential topics", "To keep only a few top-ranked topics"] },
-                    { src: "Kahoot", cat: "L1 Intro", q: "What does GPT stand for in ChatGPT?", a: "Generative Pre-trained Transformer", opts: ["Guide for Personal Tasks", "Generative Pre-trained Transformer"] },
-
-                    // Kahoot L2
-                    { src: "Kahoot", cat: "L2 Cluster", q: "Which one is FALSE about clustering?", a: "Two clusters can have common observations", opts: ["Each cluster is a subset", "Union is entire data", "Two clusters can have common observations", "Within cluster similar"] },
-                    { src: "Kahoot", cat: "L2 Cluster", q: "We separate a customer base into four groups based on Male/Female and age group. This is clustering.", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L2 Cluster", q: "Which one is FALSE about Euclidean Distance?", a: "No variable can dominate other variables", opts: ["No variable can dominate other variables", "Sqrt of sum squared diff", "Feature scaling needed", "Categorical can overshadow"] },
-                    { src: "Kahoot", cat: "L2 Cluster", q: "Complete linkage measures the minimum distance.", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L2 Cluster", q: "What is FALSE about Agglomerative Clustering?", a: "The final outcome is one cluster, regardless of the distance threshold", opts: ["Merges hierarchically", "Expensive", "Various linkages", "The final outcome is one cluster, regardless of the distance threshold"] },
-                    { src: "Kahoot", cat: "L2 Cluster", q: "What is FALSE about K-Means?", a: "If we start K-Means with K=3, we might end up with a 2-cluster result", opts: ["Start with random K", "Assign to nearest", "If we start K-Means with K=3, we might end up with a 2-cluster result", "Stop when no change"] },
-                    { src: "Kahoot", cat: "L2 Cluster", q: "What is Average Silhouette Score NOT about?", a: "Whether each observation is in the right cluster", opts: ["How close within a cluster", "How far from other clusters", "Whether each observation is in the right cluster"] },
-                    { src: "Kahoot", cat: "L2 PCA", q: "Principal Components usually cannot be interpreted to variables in real life.", a: "True", opts: ["True", "False"] },
-
-                    // Kahoot L3
-                    { src: "Kahoot", cat: "L3 Reg", q: "Which option is FALSE about the linear regression model?", a: "Beta0 is the gradient of the fitted line", opts: ["y is target", "x is input", "Beta0 is intercept", "Beta0 is the gradient of the fitted line"] },
-                    { src: "Kahoot", cat: "L3 Reg", q: "Which option is FALSE about MLR and R²?", a: "If R² gets higher, the model definitely becomes a better fit", opts: ["Allows ceteris paribus", "If R² gets higher, the model definitely becomes a better fit", "R² usually increases with vars", "Assumes no constant input"] },
-                    { src: "Kahoot", cat: "L3 Reg", q: "A positive coefficient for xi in MLR implies that y and xi are positively correlated.", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L3 Reg", q: "Which coefficient indicates the vertical height difference between two lines? (Dummy)", a: "Beta1", opts: ["Beta0", "Beta1", "Beta2", "y"] },
-                    { src: "Kahoot", cat: "L3 Reg", q: "If a categorical variable has 10 values, how many dummy variables?", a: "9", opts: ["8", "9", "10", "11"] },
-                    { src: "Kahoot", cat: "L3 Reg", q: "Which option is FALSE about training vs. testing set?", a: "Testing set should be bigger than training set", opts: ["Training contains known target", "Testing set should be bigger than training set", "Testing has hidden target", "Testing not for training"] },
-                    { src: "Kahoot", cat: "L3 Logistic", q: "Logistic Regression is more suitable as a classifier than Linear Regression.", a: "True", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L3 Logistic", q: "What is the odds of a coin toss being head (70% chance)?", a: "7/3", opts: ["3/7", "1", "7/3", "0"] },
-                    { src: "Kahoot", cat: "L3 Logistic", q: "Which sum below equals 1?", a: "TPR + FNR", opts: ["TPR + FPR", "TNR + FNR", "TPR + FNR", "Precision + TPR"] },
-                    { src: "Kahoot", cat: "L3 Logistic", q: "Which model should optimize for Recall?", a: "Earthquake model predicts negative but earthquake is coming", opts: ["YouTube ad", "Earthquake model predicts negative but earthquake is coming"] },
-
-                    // Kahoot L4
-                    { src: "Kahoot", cat: "L4 Method", q: "Low Bias and High Variance describes?", a: "Complex model; overfitting", opts: ["Complex model; overfitting", "Complex model; underfitting", "Simple model; underfitting", "Simple model; overfitting"] },
-                    { src: "Kahoot", cat: "L4 Method", q: "Min observations for 5 regression terms?", a: "50", opts: ["30", "40", "50", "60"] },
-                    { src: "Kahoot", cat: "L4 Reg", q: "If penalty alpha is large, coefficients are limited to a small space.", a: "True", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L4 Reg", q: "Which regularization produces sparse coefficients?", a: "LASSO", opts: ["LASSO", "Ridge"] },
-                    { src: "Kahoot", cat: "L4 Method", q: "Which option is FALSE about train-validation-test?", a: "Validation set can only be used once for training", opts: ["Test set used once", "Test diverse", "Validation set can only be used once for training", "Validation used to fine-tune"] },
-                    { src: "Kahoot", cat: "L4 Method", q: "Leave-one-out CV is for small datasets.", a: "True", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L4 Reg", q: "Area changes sq meters to sq feet (value increases). Implication?", a: "Value goes up; less penalty on coefficient", opts: ["Value down; less penalty", "Value up; more penalty", "Value down; more penalty", "Value goes up; less penalty on coefficient"] },
-                    { src: "Kahoot", cat: "L4 Method", q: "When we have very big datasets, we usually prefer complex models.", a: "True", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L4 Method", q: "If y is 90% True in train, model likely predicts all False.", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L4 Reg", q: "What is NOT the purpose of regularization?", a: "Find the perfect model for the training dataset", opts: ["Address overfitting", "Prevent complex", "Reduce coeff", "Find the perfect model for the training dataset"] },
-
-                    // Kahoot L5
-                    { src: "Kahoot", cat: "L5 Tree", q: "What is NOT a difficult task of Regression analysis?", a: "Implement Regression’s training algorithm", opts: ["Determine non-linear", "Implement Regression’s training algorithm", "Determine impact", "Converge"] },
-                    { src: "Kahoot", cat: "L5 Tree", q: "Which is FALSE about decision tree?", a: "A leaf node can be further split", opts: ["Root topmost", "Parent has children", "A leaf node can be further split", "Interpreted as rules"] },
-                    { src: "Kahoot", cat: "L5 Tree", q: "CART can handle both classification and regression.", a: "True", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L5 Tree", q: "If categorical input has 3 values, how many split points?", a: "3", opts: ["2", "3", "4", "5"] },
-                    { src: "Kahoot", cat: "L5 Tree", q: "Which node has largest Gini impurity?", a: "Node has 4 rows(y value:2 Yes, 2 No)", opts: ["5 rows (3Y 2N)", "4 rows (4Y 0N)", "Node has 4 rows(y value:2 Yes, 2 No)", "5 rows (2Y 3N)"] },
-                    { src: "Kahoot", cat: "L5 Tree", q: "Entropy of 5 Yes 5 No?", a: "-5/10*log2 (5/10) - 5/10*log2 (5/10)", opts: ["Formula A", "Formula B", "Formula C", "-5/10*log2 (5/10) - 5/10*log2 (5/10)"] },
-                    { src: "Kahoot", cat: "L5 Tree", q: "Purpose of pruning is to prevent underfitting?", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L5 Tree", q: "Purpose of Gain Ratio?", a: "To address the issue that Information gain prefers input with many values", opts: ["Prefers binary", "To address the issue that Information gain prefers input with many values"] },
-
-                    // Kahoot L7
-                    { src: "Kahoot", cat: "L7 ANN", q: "How many hidden layers in a three-layer ANN?", a: "2", opts: ["1", "2", "3", "4"] },
-                    { src: "Kahoot", cat: "L7 ANN", q: "Backprop means calculating output from input?", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L7 ANN", q: "Which is NOT a common activation function?", a: "Sine", opts: ["Sigmoid", "Tanh", "ReLU", "Sine"] },
-                    { src: "Kahoot", cat: "L7 ANN", q: "Gradient descent objective?", a: "Find a minimum ofr the loss function", opts: ["Find max", "Find zero", "Find a minimum ofr the loss function"] },
-                    { src: "Kahoot", cat: "L7 ANN", q: "Which application is NOT suitable for RNN?", a: "Predicting default using 1000 customers’ credit data", opts: ["Predicting default using 1000 customers’ credit data", "Score audio", "Predict stock", "Translate text"] },
-                    { src: "Kahoot", cat: "L7 ANN", q: "LSTM is capable of learning long-term dependencies?", a: "True", opts: ["True", "False"] },
-
-                    // Kahoot L8
-                    { src: "Kahoot", cat: "L8 Ensemble", q: "What is FALSE about ensemble models?", a: "It is interpretable", opts: ["Generates many models", "Combines outcome", "It is interpretable"] },
-                    { src: "Kahoot", cat: "L8 Ensemble", q: "What is FALSE about bagging?", a: "The misclassified rows are more likely to be chosen", opts: ["Treated equally", "The misclassified rows are more likely to be chosen", "Bootstrap uses random"] },
-                    { src: "Kahoot", cat: "L8 Ensemble", q: "What is FALSE about Random Forest?", a: "It increases the chance of overfitting", opts: ["Extension of bagging", "Uses subset inputs", "It increases the chance of overfitting", "Less significant inputs used"] },
-                    { src: "Kahoot", cat: "L8 Ensemble", q: "What is FALSE about boosting?", a: "Misclassified observations’ weights go down", opts: ["Misclassified observations’ weights go down", "Initially equal", "Correctly classified down", "One model per iteration"] },
-                    { src: "Kahoot", cat: "L8 Ensemble", q: "In AdaBoost, what is FALSE about weight?", a: "The error rate of a component model is the number of misclassfied cases", opts: ["Small error bigger weight", "Small error dominant", "The error rate of a component model is the number of misclassfied cases"] },
-                    { src: "Kahoot", cat: "L8 Ensemble", q: "Bagging is more prone to overfitting than boosting?", a: "False", opts: ["True", "False"] },
-
-                    // Kahoot L9
-                    { src: "Kahoot", cat: "L9 MAB", q: "Why is MAB suitable for YouTube Ad?", a: "MAB adaptively displays the ads that have shown higher performance", opts: ["Diverse", "MAB adaptively displays the ads that have shown higher performance", "Efficient"] },
-                    { src: "Kahoot", cat: "L9 MAB", q: "Random Pull favors best arm?", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L9 MAB", q: "Fixed epsilon means exploration goes down?", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L9 MAB", q: "As n -> infinity, posterior closer to truth?", a: "True", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L9 MAB", q: "Likelihood of choosing Arm 2 (Green) vs Arm 3 (Red)?", a: "Very likely cos the reward of arm 2 is most likely higher than arm 3 (red)", opts: ["Unlikely", "Very likely cos the reward of arm 2 is most likely higher than arm 3 (red)", "Unlikely < Arm 1", "Equal"] },
-                    { src: "Kahoot", cat: "L9 MAB", q: "Exploration maximizes immediate rewards?", a: "False", opts: ["True", "False"] },
-
-                    // Kahoot L10
-                    { src: "Kahoot", cat: "L10 CNN", q: "Semantic vs Instance Segmentation same?", a: "False", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L10 CNN", q: "Why CNN superior for images?", a: "CNNs can capture local patterns and spactial relationsips in images", opts: ["CNNs can capture local patterns and spactial relationsips in images", "Less computation", "Time series", "Interpretability"] },
-                    { src: "Kahoot", cat: "L10 CNN", q: "Purpose of convolution?", a: "Feature extraction", opts: ["Non-linear", "Regularization", "Feature extraction", "Dim reduction"] },
-                    { src: "Kahoot", cat: "L10 CNN", q: "Activation adds non-linearity?", a: "True", opts: ["True", "False"] },
-                    { src: "Kahoot", cat: "L10 CNN", q: "Purpose of pooling?", a: "Dimension reduction", opts: ["Feature extraction", "Non-linear", "Dimension reduction", "Regularization"] }
-                ],
-                questionBank: [],
-
-                // Quiz Templates (AI)
-                quizTemplates: [
-                    { gen: () => ({ q: "What is FALSE about Bagging?", a: "It focuses on misclassified observations", opts: ["Models trained in parallel", "It focuses on misclassified observations", "Reduces Variance", "Uses Bootstrap"], exp: "Focusing on misclassified is Boosting, not Bagging." }) },
-                    { gen: () => ({ q: "In K-Means, does the algorithm guarantee finding the global optimum?", a: "False", opts: ["True", "False"], exp: "It is sensitive to initial centroids and may trap in local optima." }) },
-                    { gen: () => ({ q: "If you have 5 categorical values, how many dummy variables?", a: "4", opts: ["3", "4", "5", "6"], exp: "n-1 rule: 5 values needs 4 dummies." }) },
-                    { gen: () => ({ q: "Which metric minimizes False Negatives?", a: "Recall", opts: ["Precision", "Recall", "Accuracy", "Specificity"], exp: "Recall = TP / (TP + FN)." }) },
-                    { gen: () => ({ q: "In Thompson Sampling, which distribution models the probability?", a: "Beta Distribution", opts: ["Normal", "Beta Distribution", "Uniform", "Poisson"], exp: "Beta is the conjugate prior for Bernoulli rewards." }) },
-                    { gen: () => ({ q: "What happens if Learning Rate in ANN is too high?", a: "Oscillation / Divergence", opts: ["Slow convergence", "Oscillation / Divergence", "Overfitting", "Perfect fit"], exp: "It overshoots the minimum." }) },
-                    { gen: () => ({ q: "Which regularization performs feature selection?", a: "Lasso (L1)", opts: ["Ridge (L2)", "Lasso (L1)", "Linear", "Polynomial"], exp: "L1 penalty drives coefficients to zero." }) },
-                    { gen: () => ({ q: "True or False: R-squared always increases with more variables.", a: "True", opts: ["True", "False"], exp: "Mathematical property of OLS." }) },
-                    { gen: () => ({ q: "In CNN, what provides translation invariance?", a: "Pooling", opts: ["Convolution", "Pooling", "ReLU", "Flatten"], exp: "Pooling summarizes local features." }) },
-                    { gen: () => ({ q: "Which tree algorithm uses Gain Ratio?", a: "C4.5 / C5.0", opts: ["CART", "ID3", "C4.5 / C5.0", "Random Forest"], exp: "To address bias towards many-valued attributes." }) }
-                ]
+                currentQuizQuestion: {}
             }
         },
         computed: {
             filteredQuestions() {
-                if (this.bankFilter === 'All') return this.questionBank;
-                if (this.bankFilter === 'Practice') return this.questionBank.filter(q => q.source === 'Practice');
-                return this.questionBank.filter(q => q.category === this.bankFilter);
+                if (this.bankFilter === 'All') return this.allQuestions;
+                if (this.bankFilter === 'Practice') return this.allQuestions.filter(q => q.source === 'Practice');
+                return this.allQuestions.filter(q => q.cat.startsWith(this.bankFilter));
             }
         },
-        created() {
-            // Init Questions
-            this.questionBank = this.rawQuestions.map(q => ({
-                ...q,
-                options: q.opts,
-                userSelected: null
-            }));
-            
-            // Watch mistakes for saving
-            this.$watch('mistakes', (val) => {
-                localStorage.setItem('infs_mistakes_v3', JSON.stringify(val));
-            }, { deep: true });
+        watch: {
+            mistakes: {
+                handler(val) { localStorage.setItem('infs_mistakes_v4', JSON.stringify(val)); },
+                deep: true
+            }
+        },
+        mounted() {
+            // Pre-process questions to add state
+            this.allQuestions.forEach(q => {
+                q.userSelected = null;
+            });
         },
         methods: {
             resetApp() {
-                if(confirm('Clear all mistakes?')) {
-                    localStorage.removeItem('infs_mistakes_v3');
+                if(confirm("Reset all mistakes?")) {
+                    localStorage.removeItem('infs_mistakes_v4');
                     window.location.reload();
                 }
             },
-            toggleNote(index) {
-                this.notesData[index].isOpen = !this.notesData[index].isOpen;
-            },
-            
-            // --- Bank Methods ---
             checkBankAnswer(q, opt) {
                 q.userSelected = opt;
                 if(opt !== q.answer) {
                     const m = JSON.parse(JSON.stringify(q));
-                    m.userSelected = null; 
-                    if(!this.mistakes.find(x => x.question === m.question)) {
-                        this.mistakes.push(m);
-                    }
+                    m.userSelected = null;
+                    if(!this.mistakes.find(x => x.q === m.q)) this.mistakes.push(m);
                 }
             },
             getBankClass(q, opt) {
-                if(!q.userSelected) return 'border-gray-200 hover:bg-gray-50';
-                if(opt === q.answer) return 'opt-correct';
-                if(opt === q.userSelected) return 'opt-wrong';
+                if (!q.userSelected) return 'border-gray-200 hover:bg-blue-50';
+                if (opt === q.answer) return 'bg-green-100 border-green-500 text-green-700 font-bold';
+                if (opt === q.userSelected) return 'bg-red-100 border-red-500 text-red-700';
                 return 'opacity-50';
             },
-
-            // --- Mistake Methods ---
             solveMistake(idx, opt, ans) {
                 if(opt === ans) {
-                    alert("Correct! Removed from list.");
+                    alert("Correct! Removed from mistakes.");
                     this.mistakes.splice(idx, 1);
                 } else {
                     alert("Wrong again!");
                 }
             },
-
-            // --- Quiz Methods ---
             startQuiz() {
-                this.quizQuestions = [];
-                for(let i=0; i<10; i++) {
-                    const tmpl = this.quizTemplates[Math.floor(Math.random() * this.quizTemplates.length)];
-                    const qData = tmpl.gen();
-                    const shuffledOpts = [...qData.opts].sort(() => 0.5 - Math.random());
-                    this.quizQuestions.push({ question: qData.q, answer: qData.a, options: shuffledOpts, explanation: qData.exp });
-                }
+                this.quizQuestions = this.allQuestions.sort(() => 0.5 - Math.random()).slice(0, 10);
                 this.currentQuestionIndex = 0;
                 this.score = 0;
                 this.hasAnswered = false;
@@ -543,17 +350,19 @@
             },
             checkQuizAnswer(opt) {
                 this.hasAnswered = true;
-                if(opt === this.currentQuizQuestion.answer) {
+                if (opt === this.currentQuizQuestion.answer) {
                     this.score++;
+                    this.isCorrect = true;
                 } else {
+                    this.isCorrect = false;
                     const m = JSON.parse(JSON.stringify(this.currentQuizQuestion));
-                    m.category = "AI Quiz";
-                    if(!this.mistakes.find(x => x.question === m.question)) this.mistakes.push(m);
+                    m.userSelected = null;
+                    if(!this.mistakes.find(x => x.q === m.q)) this.mistakes.push(m);
                 }
             },
             getQuizClass(opt) {
-                if(!this.hasAnswered) return 'border-gray-200 hover:bg-blue-50';
-                if(opt === this.currentQuizQuestion.answer) return 'opt-correct';
+                if (!this.hasAnswered) return 'border-gray-200 hover:bg-blue-50';
+                if (opt === this.currentQuizQuestion.answer) return 'bg-green-100 border-green-500 font-bold';
                 return 'opacity-50';
             },
             nextQuestion() {
