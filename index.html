@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INFS5720 Review App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>INFS5720 Review</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -15,6 +15,7 @@
             font-family: 'Inter', sans-serif;
             background-color: #eef2f6;
             color: #334155;
+            overflow: hidden; /* Prevent body scroll, handle in app */
         }
         /* Hide Scrollbar but keep functionality */
         .hide-scrollbar::-webkit-scrollbar {
@@ -26,8 +27,7 @@
         }
         /* Mobile Frame Simulation */
         .mobile-frame {
-            box-shadow: 0 20px 40px -10px rgba(30, 58, 138, 0.15);
-            min-height: 100vh;
+            box-shadow: 0 0 0 0; /* Remove shadow for full screen feel on mobile */
         }
         
         /* Custom Tab Animations */
@@ -60,7 +60,7 @@
 </head>
 <body>
 
-<div id="app" class="max-w-md mx-auto bg-gray-50 mobile-frame relative overflow-hidden flex flex-col h-screen">
+<div id="app" class="max-w-md mx-auto bg-gray-50 mobile-frame relative overflow-hidden flex flex-col h-[100dvh]">
 
     <header class="bg-blue-600 pb-20 pt-12 px-8 header-curve shadow-lg z-10 shrink-0 relative">
         <div class="flex justify-between items-center mb-6">
@@ -102,9 +102,9 @@
         </div>
     </header>
 
-    <main class="-mt-10 flex-1 overflow-y-auto hide-scrollbar px-6 pb-20 pt-4 z-0">
+    <main class="-mt-10 flex-1 overflow-y-auto hide-scrollbar px-6 pb-40 pt-4 z-0">
         
-        <div v-if="currentTab === 'notes'" class="space-y-4 pb-10">
+        <div v-if="currentTab === 'notes'" class="space-y-4">
             <div class="flex items-center justify-between mb-2 px-1">
                 <h2 class="text-lg font-bold text-gray-800">Study Notes</h2>
                 <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">{{ chapters.length }} Topics</span>
@@ -136,7 +136,7 @@
             </div>
         </div>
 
-        <div v-if="currentTab === 'bank'" class="pb-10">
+        <div v-if="currentTab === 'bank'">
             <div class="sticky top-0 bg-gray-50/95 backdrop-blur-sm pt-2 pb-4 z-20 flex justify-between items-center border-b border-gray-200 mb-4">
                 <h2 class="text-lg font-bold text-gray-800">Question Bank</h2>
                 <div class="relative">
@@ -212,7 +212,7 @@
             </div>
         </div>
 
-        <div v-if="currentTab === 'quiz'" class="pb-10">
+        <div v-if="currentTab === 'quiz'">
             <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 text-white mb-6 shadow-lg shadow-indigo-500/20 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
                 <h2 class="text-lg font-bold mb-1 relative z-10">AI Simulator</h2>
@@ -267,7 +267,7 @@
             </div>
         </div>
 
-        <div v-if="currentTab === 'mistakes'" class="pb-10">
+        <div v-if="currentTab === 'mistakes'">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h2 class="text-lg font-bold text-gray-800">Mistake Book</h2>
