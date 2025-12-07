@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>INFS5720</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text: #1C1C1E;
+            --success: #34C759;
+            --error: #FF3B30;
+            --border: #E5E5EA;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            padding-bottom: 90px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Header */
+        header {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+        h1 { font-size: 1.1rem; margin: 0; font-weight: 700; color: var(--text); }
+
+        /* Content */
+        .tab-content { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .card h3 { margin-top: 0; color: var(--primary); font-size: 1.1rem; }
+        
+        /* Tables in Notes */
+        .note-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin: 10px 0;
+        }
+        .note-table th, .note-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .note-table th { background-color: #f8f9fa; color: var(--primary); }
+
+        /* Accordion for Notes */
+        details {
+            background: var(--card-bg);
+            margin-bottom: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        summary {
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '+'; color: var(--primary); font-size: 1.2rem; }
+        details[open] summary::after { content: '-'; }
+        details[open] summary { border-bottom: 1px solid var(--border); background-color: #fafafa; }
+        .note-body { padding: 15px; line-height: 1.6; font-size: 0.95rem; }
+        .note-body ul { padding-left: 20px; margin: 5px 0; }
+        .note-body li { margin-bottom: 5px; }
+
+        /* Question Bank */
+        .filter-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            scrollbar-width: none;
+        }
+        .filter-btn {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            color: #666;
+            cursor: pointer;
+        }
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .q-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+        }
+        .q-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: #888; margin-bottom: 8px; }
+        .q-text { font-weight: 600; margin-bottom: 12px; font-size: 1rem; }
+        .q-opt {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            text-align: left;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .q-opt.correct { background: #e8f5e9; border-color: var(--success); color: #1b5e20; }
+        .q-opt.wrong { background: #ffebee; border-color: var(--error); color: #b71c1c; }
+        .q-exp {
+            display: none;
+            margin-top: 10px;
+            padding: 12px;
+            background: #f1f8ff;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #333;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 25px 0;
+            z-index: 1000;
+        }
+        .nav-item {
+            text-align: center;
+            font-size: 0.65rem;
+            color: #999;
+            cursor: pointer;
+            flex: 1;
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 3px; }
+
+        /* Quiz Mode */
+        .btn-primary {
+            background: var(--primary); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer;
+        }
+        .mermaid { text-align: center; background: white; padding: 10px; border-radius: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>INFS5720</h1>
+</header>
+
+<div id="tab-outline" class="tab-content active">
+    <div class="card">
+        <h3>🧾 Part 0: Exam Essentials Summary</h3>
+        <p><b>1️⃣ Machine Learning Categories (L1)</b></p>
+        <ul>
+            <li><b>Supervised:</b> Has a target.
+                <ul>
+                    <li><i>Regression:</i> Linear, Multiple, Regularized (Ridge, LASSO).</li>
+                    <li><i>Classification:</i> Logistic, Decision Tree, ANN, Ensemble (RF, Boosting), CNN.</li>
+                </ul>
+            </li>
+            <li><b>Unsupervised:</b> No target.
+                <ul>
+                    <li>Clustering (Hierarchical / K-means), PCA (Dim. Reduction).</li>
+                </ul>
+            </li>
+            <li><b>Reinforcement Learning:</b> Multi-Armed Bandits (MAB).</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>2️⃣ Model Comparison Table</h3>
+        <table class="note-table">
+            <tr><th>Category</th><th>Model</th><th>Target</th><th>Characteristics</th></tr>
+            <tr><td>Regression</td><td>Linear / Multiple</td><td>Continuous</td><td>Interpretable coefficients, linear assumption.</td></tr>
+            <tr><td>Regression</td><td>Regularized (Ridge/LASSO)</td><td>Continuous</td><td>Solves overfitting, handles multicollinearity.</td></tr>
+            <tr><td>Classification</td><td>Logistic Regression</td><td>Binary (0/1)</td><td>Probabilistic, interpreted via Odds Ratio.</td></tr>
+            <tr><td>Tree-based</td><td>Decision Tree (CART)</td><td>Cont. or Cat.</td><td>Non-linear, interpretable, prone to overfit (needs pruning).</td></tr>
+            <tr><td>Ensemble</td><td>Random Forest, Boosting</td><td>Cont. or Cat.</td><td>Combines trees, improves stability/accuracy.</td></tr>
+            <tr><td>Neural Nets</td><td>ANN</td><td>Cont. or Cat.</td><td>Multi-layer, non-linear, requires large data/compute.</td></tr>
+            <tr><td>Deep CV</td><td>CNN</td><td>Image</td><td>Uses convolution for feature extraction.</td></tr>
+            <tr><td>Unsupervised</td><td>Clustering</td><td>No Y</td><td>Finds groups (market segmentation).</td></tr>
+            <tr><td>Unsupervised</td><td>PCA</td><td>No Y</td><td>Dim. reduction, feature compression.</td></tr>
+            <tr><td>RL</td><td>MAB</td><td>Reward</td><td>Online experiment: Explore vs Exploit.</td></tr>
+        </table>
+    </div>
+</div>
+
+<div id="tab-mindmap" class="tab-content">
+    <div class="card">
+        <h3>🧠 Model Relationships</h3>
+        <p style="font-size:0.8rem; color:#666;">Pinch to zoom</p>
+        <div class="mermaid">
+            graph TD
+            ML[Machine Learning]
+            
+            %% Branches
+            ML --> SUP(Supervised<br>Target Y)
+            ML --> UNSUP(Unsupervised<br>No Target)
+            ML --> RL(Reinforcement<br>Reward)
+
+            %% Supervised
+            SUP --> REG[Regression<br>Continuous Y]
+            SUP --> CLS[Classification<br>Categorical Y]
+
+            REG --> LIN[Linear Regression]
+            LIN -->|Overfitting Fix| REGUL[Regularization]
+            REGUL --> LASSO[LASSO L1<br>Feature Selection]
+            REGUL --> RIDGE[Ridge L2<br>Shrink Coeffs]
+
+            CLS --> LOG[Logistic Regression<br>Probabilities]
+            CLS --> DT[Decision Tree<br>Rules/White Box]
+            CLS --> ANN[ANN<br>Complex/Black Box]
+
+            DT -->|Reduce Variance| RF[Random Forest<br>Bagging]
+            DT -->|Reduce Bias| BOOST[AdaBoost<br>Boosting]
+
+            ANN -->|Images| CNN[CNN]
+            ANN -->|Sequence| RNN[RNN/LSTM]
+
+            %% Unsupervised
+            UNSUP --> CLUST[Clustering]
+            CLUST --> KM[K-Means<br>Pre-set K]
+            CLUST --> HIER[Hierarchical<br>Dendrogram]
+            
+            UNSUP --> DIM[Dimension Reduction]
+            DIM --> PCA[PCA]
+
+            %% RL
+            RL --> MAB[Multi-Armed Bandits]
+            MAB --> EXP[Exploration vs Exploitation]
+        </div>
+    </div>
+</div>
+
+<div id="tab-notes" class="tab-content">
+    <h3>📚 Part 1: Detailed Lecture Notes</h3>
+    
+    <details>
+        <summary>L1: Introduction</summary>
+        <div class="note-body">
+            <ul>
+                <li><b>Analytics Types (By Purpose):</b>
+                    <ul>
+                        <li><b>Descriptive:</b> What happened?</li>
+                        <li><b>Diagnostic:</b> Why did it happen?</li>
+                        <li><b>Predictive:</b> What will happen? (Course Focus)</li>
+                        <li><b>Prescriptive:</b> What should we do?</li>
+                    </ul>
+                </li>
+                <li><b>Learning Types:</b>
+                    <ul>
+                        <li><b>Supervised:</b> Labeled data (Target Y). Used for prediction.</li>
+                        <li><b>Unsupervised:</b> Unlabeled. Finds patterns (Clustering, PCA).</li>
+                        <li><b>Reinforcement:</b> Agent trials & errors for rewards (MAB).</li>
+                    </ul>
+                </li>
+                <li><b>Deep Learning (DL):</b> Subset of ML using multi-layer neural networks.</li>
+                <li><b>Evaluation:</b> Train set for parameters, Test set for generalization. Never train on test set.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>L2: Clustering & PCA</summary>
+        <div class="note-body">
+            <p><b>Clustering:</b> Minimize within-cluster variance, Maximize between-cluster variance.</p>
+            <ul>
+                <li><b>Distance:</b> Euclidean (sensitive to scale). <b>Must perform Scaling</b> (Standardization/Normalization) first.</li>
+                <li><b>Hierarchical (Agglomerative):</b> Bottom-up. No need to set K initially. Visualized by <b>Dendrogram</b>.</li>
+                <li><b>K-Means (Partitioning):</b> Must set K. Steps: Init centroids -> Assign points -> Update centroids -> Repeat. Sensitive to outliers/initialization.</li>
+                <li><b>Metric:</b> Silhouette Score (closer to 1 is better).</li>
+            </ul>
+            <p><b>PCA (Dimension Reduction):</b></p>
+            <ul>
+                <li>Projects data to new orthogonal axes (Principal Components).</li>
+                <li>PC1 captures max variance; PC2 captures next max variance.</li>
+                <li>Used for visualization or removing multicollinearity.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>L3: Linear & Logistic Regression</summary>
+        <div class="note-body">
+            <p><b>Linear Regression:</b></p>
+            <ul>
+                <li>Objective: Minimize <b>MSE / RSS</b>.</li>
+                <li>Metric: <b>R²</b> (Explained variance ratio), <b>RMSE</b>.</li>
+                <li><b>MLR:</b> Multiple inputs. Risk of <b>Multicollinearity</b>. Coefficients imply correlation (Ceteris Paribus).</li>
+            </ul>
+            <p><b>Logistic Regression (Classification):</b></p>
+            <ul>
+                <li>Target: Binary (0/1).</li>
+                <li>Uses <b>Sigmoid</b> function to squash output to [0,1].</li>
+                <li><b>Logit</b> is linear: $z = \log(p / (1-p))$.</li>
+                <li><b>Odds Ratio (OR):</b> $e^\beta$. If X increases by 1, Odds multiply by OR.</li>
+                <li><b>Metrics:</b> Accuracy, Precision (avoid FP), Recall (avoid FN), ROC/AUC.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>L4: Regularization & Methodology</summary>
+        <div class="note-body">
+            <p><b>Bias-Variance Tradeoff:</b></p>
+            <ul>
+                <li><b>Simple Model:</b> High Bias, Low Variance (Underfit).</li>
+                <li><b>Complex Model:</b> Low Bias, High Variance (Overfit).</li>
+            </ul>
+            <p><b>Regularization (Adds Penalty):</b></p>
+            <ul>
+                <li><b>Lasso (L1):</b> Can shrink coefficients to <b>0</b>. Features Selection.</li>
+                <li><b>Ridge (L2):</b> Shrinks coefficients towards 0 but not exactly 0. Handles multicollinearity.</li>
+                <li><b>Cross-Validation (k-fold):</b> Used to tune hyperparameter $\alpha$.</li>
+            </ul>
+            <p><b>Imbalanced Data:</b> Use Precision/Recall/F1/AUC instead of Accuracy. Solutions: Resampling, adjusting thresholds.</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>L5: Decision Tree</summary>
+        <div class="note-body">
+            <ul>
+                <li><b>Mechanism:</b> Recursive partitioning. Splits to maximize purity gain.</li>
+                <li><b>Metrics:</b> Gini Impurity or Entropy (Information Gain) for classification; SSE for regression.</li>
+                <li><b>Pros:</b> Interpretable (Rules), handles non-linear/interactions.</li>
+                <li><b>Cons:</b> Prone to <b>Overfitting</b> (deep trees).</li>
+                <li><b>Solution:</b> <b>Pruning</b> (Cost-complexity) or Ensembles.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>L7: Artificial Neural Networks (ANN)</summary>
+        <div class="note-body">
+            <ul>
+                <li><b>Structure:</b> Input -> Hidden Layers -> Output.</li>
+                <li><b>Activation Function:</b> Introduces <b>non-linearity</b>. (Sigmoid, Tanh, ReLU). Without it, NN is just linear regression.</li>
+                <li><b>Forward Propagation:</b> Calculate output.</li>
+                <li><b>Backpropagation:</b> Calculate error gradient and update weights (Gradient Descent).</li>
+                <li><b>Requires:</b> Large data. Black box model.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>L8: Ensemble Models</summary>
+        <div class="note-body">
+            <p><b>Bagging (Bootstrap Aggregating):</b></p>
+            <ul>
+                <li>Train models in parallel on bootstrap samples.</li>
+                <li>Example: <b>Random Forest</b> (Random subset of features at each split).</li>
+                <li>Reduces <b>Variance</b> (Stability).</li>
+            </ul>
+            <p><b>Boosting:</b></p>
+            <ul>
+                <li>Train models sequentially.</li>
+                <li>Each model focuses on errors of previous ones (re-weighting).</li>
+                <li>Example: <b>AdaBoost</b>.</li>
+                <li>Reduces <b>Bias</b> (Accuracy).</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>L9: Multi-Armed Bandits (MAB)</summary>
+        <div class="note-body">
+            <ul>
+                <li><b>Problem:</b> Unknown reward distributions for K arms. Goal: Maximize total reward.</li>
+                <li><b>Tradeoff:</b> Exploration (Try new) vs Exploitation (Use best).</li>
+                <li><b>Algorithms:</b>
+                    <ul>
+                        <li><b>Random:</b> Baseline.</li>
+                        <li><b>Epsilon-Greedy:</b> Exploit $(1-\epsilon)$, Explore $(\epsilon)$.</li>
+                        <li><b>Thompson Sampling:</b> Bayesian approach. Sample from posterior distribution.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>L10: CNN & Future of AI</summary>
+        <div class="note-body">
+            <p><b>CNN (Convolutional NN):</b></p>
+            <ul>
+                <li>Specialized for Images.</li>
+                <li><b>Convolution:</b> Uses filters/kernels to extract local features (edges, shapes). Sharing weights.</li>
+                <li><b>Pooling:</b> Down-sampling (dimension reduction) to keep important features.</li>
+            </ul>
+            <p><b>AI Trends:</b> Generative AI, Ethics, Fairness.</p>
+        </div>
+    </details>
+</div>
+
+<div id="tab-bank" class="tab-content">
+    <div class="filter-container">
+        <button class="filter-btn active" onclick="filterBank('all')">All</button>
+        <button class="filter-btn" onclick="filterBank('L1')">L1</button>
+        <button class="filter-btn" onclick="filterBank('L2')">L2</button>
+        <button class="filter-btn" onclick="filterBank('L3')">L3</button>
+        <button class="filter-btn" onclick="filterBank('L4')">L4</button>
+        <button class="filter-btn" onclick="filterBank('L5')">L5</button>
+        <button class="filter-btn" onclick="filterBank('L7')">L7</button>
+        <button class="filter-btn" onclick="filterBank('L8')">L8</button>
+        <button class="filter-btn" onclick="filterBank('L9')">L9</button>
+        <button class="filter-btn" onclick="filterBank('L10')">L10</button>
+        <button class="filter-btn" onclick="filterBank('Practice')">Practice</button>
+    </div>
+    
+    <div id="bank-content"></div>
+</div>
+
+<div id="tab-quiz" class="tab-content">
+    <div id="quiz-start-view" class="card" style="text-align:center; padding: 40px 20px;">
+        <h2>⚡ Auto Quiz Mode</h2>
+        <p>Randomly selects 10 questions from the entire bank.</p>
+        <p>Simulates real exam style (MCQ).</p>
+        <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div id="quiz-play-view" style="display:none;">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:#666; font-size:0.85rem;">
+                <span id="quiz-counter">Q 1/10</span>
+                <span id="quiz-score">Score: 0</span>
+            </div>
+            <div id="quiz-question-text" class="q-text"></div>
+            <div id="quiz-options"></div>
+            <div id="quiz-explanation" class="q-exp"></div>
+            <button id="quiz-next-btn" class="btn-primary" style="display:none; margin-top:15px;" onclick="nextQuizQuestion()">Next Question</button>
+        </div>
+    </div>
+
+    <div id="quiz-result-view" class="card" style="display:none; text-align:center; padding: 40px 20px;">
+        <h2>Quiz Completed!</h2>
+        <div style="font-size:3rem; font-weight:bold; color:var(--primary); margin:20px 0;" id="final-score"></div>
+        <p id="final-msg"></p>
+        <button class="btn-primary" onclick="startQuiz()">Retry</button>
+    </div>
+</div>
+
+<nav>
+    <div class="nav-item active" onclick="switchTab('tab-outline', this)">
+        <span class="nav-icon">📋</span>Outline
+    </div>
+    <div class="nav-item" onclick="switchTab('tab-mindmap', this)">
+        <span class="nav-icon">🧠</span>Mindmap
+    </div>
+    <div class="nav-item" onclick="switchTab('tab-notes', this)">
+        <span class="nav-icon">📝</span>Notes
+    </div>
+    <div class="nav-item" onclick="switchTab('tab-bank', this)">
+        <span class="nav-icon">📚</span>Bank
+    </div>
+    <div class="nav-item" onclick="switchTab('tab-quiz', this)">
+        <span class="nav-icon">⚡</span>Quiz
+    </div>
+</nav>
+
+<script>
+    // Initialize Mermaid
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+
+    // --- Data: Complete Question Bank ---
+    const questions = [
+        // L1
+        { cat: "L1", q: "Which option represents some level of AI?", opts: ["Calculator", "Computer", "Self-driving car", "Laundry Machine"], ans: 2, exp: "Self-driving cars involve perception, decision making, and learning, fitting the definition of AI." },
+        { cat: "L1", q: "Market segmentation is a problem under Supervised Learning.", opts: ["True", "False"], ans: 1, exp: "False. Market segmentation typically has no labels (target variable) and groups data based on similarities, making it Unsupervised (Clustering)." },
+        { cat: "L1", q: "One column from a DataFrame is a Series.", opts: ["True", "False"], ans: 0, exp: "True. In Pandas, a single column of a DataFrame is a Series." },
+        { cat: "L1", q: "Example of Topic Model?", opts: ["Label sentiment", "Find topics from documents"], ans: 1, exp: "Topic Modeling (like LDA) is unsupervised and discovers hidden themes/topics in text." },
+        { cat: "L1", q: "Document-term matrix is normally sparse.", opts: ["True", "False"], ans: 0, exp: "True. Most documents only contain a small subset of the total vocabulary, leading to many zeros." },
+        { cat: "L1", q: "Why truncate SVD?", opts: ["Find all topics", "Keep only top-ranked topics"], ans: 1, exp: "Truncation keeps the most significant singular values (concepts) and removes noise." },
+        { cat: "L1", q: "GPT stands for?", opts: ["Guide for Personal Tasks", "Generative Pre-trained Transformer"], ans: 1, exp: "Generative Pre-trained Transformer." },
+
+        // L2
+        { cat: "L2", q: "Which is FALSE about clustering?", opts: ["Clusters are subsets", "Two clusters can have common observations", "Union is entire dataset", "Observations in cluster should be similar"], ans: 1, exp: "In hard clustering, partitions are distinct; observations typically belong to only one cluster." },
+        { cat: "L2", q: "Grouping customers by Age/Gender is Clustering.", opts: ["True", "False"], ans: 1, exp: "False. This is segmentation based on rules, not machine learning clustering which finds hidden patterns." },
+        { cat: "L2", q: "Which is FALSE about Euclidean Distance?", opts: ["No variable dominates", "Sqrt of squared diff", "Requires scaling", "Integer conversion can overshadow"], ans: 0, exp: "Euclidean distance IS sensitive to scale. Large magnitude variables will dominate without scaling." },
+        { cat: "L2", q: "Complete linkage measures minimum distance?", opts: ["True", "False"], ans: 1, exp: "False. Complete linkage uses the Maximum distance between clusters. Single linkage uses Minimum." },
+        { cat: "L2", q: "Which is FALSE about K-Means?", opts: ["Start with random centroids", "Assign to nearest centroid", "Can automatically determine K", "Stop when no change"], ans: 2, exp: "K-Means requires the user to specify K (number of clusters) beforehand." },
+        { cat: "L2", q: "Silhouette Score is NOT about?", opts: ["Cohesion", "Separation", "Accuracy"], ans: 2, exp: "Clustering is unsupervised, so there is no 'Accuracy' metric (no ground truth)." },
+        { cat: "L2", q: "Principal Components usually cannot be interpreted as real variables.", opts: ["True", "False"], ans: 0, exp: "True. PCs are linear combinations of original variables, making them abstract." },
+
+        // L3
+        { cat: "L3", q: "Which is FALSE about Linear Regression?", opts: ["y is target", "x is input", "beta0 is gradient", "beta0 is intercept"], ans: 2, exp: "Beta0 is the intercept. Beta1 is the gradient/slope." },
+        { cat: "L3", q: "A positive coefficient implies y and x are definitely positively correlated.", opts: ["True", "False"], ans: 1, exp: "False. In Multiple Regression, coefficients are 'Ceteris Paribus'. Multicollinearity can flip signs." },
+        { cat: "L3", q: "Logistic Regression is more suitable as a classifier than Linear Regression.", opts: ["True", "False"], ans: 0, exp: "True. Linear regression outputs unbounded values; Logistic outputs probabilities (0-1)." },
+        { cat: "L3", q: "Odds of a head (70% chance)?", opts: ["3/7", "1", "7/3", "0"], ans: 2, exp: "Odds = P / (1-P) = 0.7 / 0.3 = 7/3." },
+        { cat: "L3", q: "Which sum equals 1?", opts: ["TPR+FPR", "TPR+FNR", "Precision+Recall"], ans: 1, exp: "True Positive Rate + False Negative Rate = 1 (All actual positives)." },
+        { cat: "L3", q: "Which model should optimize Recall?", opts: ["YouTube Ads", "Earthquake Prediction"], ans: 1, exp: "Missing an earthquake (False Negative) is catastrophic. High Recall is needed." },
+
+        // L4
+        { cat: "L4", q: "Low Bias and High Variance describes?", opts: ["Underfitting", "Overfitting"], ans: 1, exp: "High Variance means the model is too complex and sensitive to noise (Overfitting)." },
+        { cat: "L4", q: "Which regularization produces sparse coefficients (zeros)?", opts: ["LASSO", "Ridge"], ans: 0, exp: "LASSO (L1) penalty allows coefficients to hit zero, performing feature selection." },
+        { cat: "L4", q: "Purpose of validation set?", opts: ["Final testing", "Tune hyperparameters / Prevent overfitting"], ans: 1, exp: "Validation sets are for tuning (like choosing alpha or K). Test sets are for final eval." },
+        { cat: "L4", q: "If y is 90% True, model likely predicts all True.", opts: ["True", "False"], ans: 0, exp: "True. In imbalanced data, a model maximizes accuracy by predicting the majority class." },
+
+        // L5
+        { cat: "L5", q: "Which is FALSE about Decision Trees?", opts: ["Feature selection", "Handle categorical data", "Deep trees less likely to overfit", "Split based on impurity"], ans: 2, exp: "Deep trees are MORE likely to overfit (memorizing data)." },
+        { cat: "L5", q: "Gini Impurity measures?", opts: ["Tree depth", "Impurity/Randomness of split"], ans: 1, exp: "Gini measures how mixed the classes are in a node. 0 is pure." },
+        { cat: "L5", q: "Technique to prevent overfitting in trees?", opts: ["Increasing depth", "Pruning"], ans: 1, exp: "Pruning cuts back the tree to generalize better." },
+        { cat: "L5", q: "Random Forest uses?", opts: ["Bagging", "Boosting"], ans: 0, exp: "Random Forest uses Bagging (Bootstrap Aggregating)." },
+
+        // L7
+        { cat: "L7", q: "Activation function outputting 0 to 1?", opts: ["ReLU", "Sigmoid", "Tanh"], ans: 1, exp: "Sigmoid squashes output to [0, 1]. ReLU is [0, inf). Tanh is [-1, 1]." },
+        { cat: "L7", q: "Neural Networks are highly interpretable.", opts: ["True", "False"], ans: 1, exp: "False. They are considered 'Black Box' models." },
+        { cat: "L7", q: "Backpropagation is used for?", opts: ["Updating weights", "Model evaluation"], ans: 0, exp: "It calculates gradients to update weights and minimize loss." },
+
+        // L8
+        { cat: "L8", q: "Which method is Boosting?", opts: ["Random Forest", "XGBoost/AdaBoost", "Bagging"], ans: 1, exp: "XGBoost and AdaBoost are Boosting methods (Sequential)." },
+        { cat: "L8", q: "In Bagging, models are trained on?", opts: ["Identical data", "Bootstrap samples"], ans: 1, exp: "Random samples with replacement (Bootstrap)." },
+        { cat: "L8", q: "Main idea of Boosting?", opts: ["Parallel models", "Sequentially improve weak learners"], ans: 1, exp: "Boosting builds models in sequence to correct previous errors." },
+
+        // L9
+        { cat: "L9", q: "Confusion Matrix shows model weights.", opts: ["True", "False"], ans: 1, exp: "False. It shows TP, FP, TN, FN counts." },
+        { cat: "L9", q: "Metric for imbalanced data?", opts: ["Accuracy", "AUC / F1 / Precision"], ans: 1, exp: "Accuracy is misleading for imbalanced data." },
+        { cat: "L9", q: "MAB Exploration focuses on?", opts: ["Best known rewards", "Gathering info / Unknown arms"], ans: 1, exp: "Exploration is about trying unknown options." },
+
+        // L10
+        { cat: "L10", q: "Why CNNs for images?", opts: ["Capture spatial patterns", "Better interpretability"], ans: 0, exp: "CNNs use convolution to capture local spatial features (edges, shapes)." },
+        { cat: "L10", q: "Primary purpose of Convolution?", opts: ["Dimensionality reduction", "Feature extraction"], ans: 1, exp: "Convolution extracts features. Pooling does dimensionality reduction." },
+
+        // Practice Questions PDF
+        { cat: "Practice", q: "Underfitting describes?", opts: ["High Var/High Bias", "High Var/Low Bias", "Low Var/High Bias"], ans: 2, exp: "Underfitting = Model too simple = High Bias." },
+        { cat: "Practice", q: "Ridge regularization does what?", opts: ["Reduce bias", "Reduce variance"], ans: 1, exp: "Regularization increases Bias slightly to reduce Variance (prevent overfitting)." },
+        { cat: "Practice", q: "Training R² as complexity increases?", opts: ["Goes up", "Goes down"], ans: 0, exp: "Training R² always increases with complexity (memorization), but Test R² might drop." },
+        { cat: "Practice", q: "Purpose of validation set?", opts: ["Memorize training data", "Prevent overfitting/Tune hyperparameters"], ans: 1, exp: "Validation is for tuning." },
+        { cat: "Practice", q: "Best training accuracy for y (30% 0, 70% 1) if predicting one class?", opts: ["30%", "70%", "50%"], ans: 1, exp: "Predicting the majority class (1) gives 70% accuracy." },
+        { cat: "Practice", q: "Problem type for Logistic Regression?", opts: ["Regression", "Binary Classification"], ans: 1, exp: "It is a classification algorithm." },
+        { cat: "Practice", q: "In C5.0, how to prevent favoritism to inputs with many splits?", opts: ["Random noise", "Information Gain Ratio"], ans: 1, exp: "Gain Ratio penalizes attributes with many branches." },
+        { cat: "Practice", q: "False statement about Neural Networks?", opts: ["Highly interpretable", "Prone to overfitting"], ans: 0, exp: "NNs are not interpretable." },
+        { cat: "Practice", q: "True statement about AdaBoost?", opts: ["Parallel training", "Adapts to mistakes of previous models"], ans: 1, exp: "Boosting corrects previous errors." },
+        { cat: "Practice", q: "Exploration-Exploitation trade-off?", opts: ["Balancing helps discover best arm", "Exploration focuses on immediate reward"], ans: 0, exp: "Balance is key. Exploration sacrifices immediate reward for information." }
+    ];
+
+    // --- Tab Switching ---
+    function switchTab(id, navEl) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        navEl.classList.add('active');
+        window.scrollTo(0,0);
+        if(id === 'tab-bank') renderBank('all');
+    }
+
+    // --- Question Bank Logic ---
+    function filterBank(cat) {
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        renderBank(cat);
+    }
+
+    function renderBank(cat) {
+        const container = document.getElementById('bank-content');
+        container.innerHTML = '';
+        
+        const filtered = cat === 'all' ? questions : questions.filter(q => q.cat === cat);
+        
+        filtered.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'q-card';
+            div.innerHTML = `
+                <div class="q-header"><span>#${idx+1}</span><span>[${item.cat}]</span></div>
+                <div class="q-text">${item.q}</div>
+                <div class="q-options" id="bank-q-${idx}">
+                    ${item.opts.map((opt, i) => `
+                        <div class="q-opt" onclick="revealBankAnswer(this, ${i}, ${item.ans}, 'bank-exp-${idx}')">${opt}</div>
+                    `).join('')}
+                </div>
+                <div id="bank-exp-${idx}" class="q-exp">💡 <b>Explanation:</b> ${item.exp}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function revealBankAnswer(el, selected, correct, expId) {
+        const parent = el.parentElement;
+        if(parent.classList.contains('answered')) return; // Prevent re-click
+        parent.classList.add('answered');
+
+        const opts = parent.getElementsByClassName('q-opt');
+        if(selected === correct) {
+            el.classList.add('correct');
+        } else {
+            el.classList.add('wrong');
+            opts[correct].classList.add('correct');
+        }
+        document.getElementById(expId).style.display = 'block';
+    }
+
+    // --- Auto Quiz Logic ---
+    let quizQueue = [];
+    let currentQIdx = 0;
+    let quizScore = 0;
+
+    function startQuiz() {
+        // Shuffle and take 10
+        quizQueue = [...questions].sort(() => 0.5 - Math.random()).slice(0, 10);
+        currentQIdx = 0;
+        quizScore = 0;
+
+        document.getElementById('quiz-start-view').style.display = 'none';
+        document.getElementById('quiz-result-view').style.display = 'none';
+        document.getElementById('quiz-play-view').style.display = 'block';
+        
+        renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+        const q = quizQueue[currentQIdx];
+        document.getElementById('quiz-counter').innerText = `Question ${currentQIdx + 1}/10`;
+        document.getElementById('quiz-score').innerText = `Score: ${quizScore}`;
+        document.getElementById('quiz-question-text').innerText = q.q;
+        document.getElementById('quiz-explanation').style.display = 'none';
+        document.getElementById('quiz-next-btn').style.display = 'none';
+
+        const container = document.getElementById('quiz-options');
+        container.innerHTML = '';
+        container.classList.remove('answered');
+
+        q.opts.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'q-opt';
+            div.innerText = opt;
+            div.onclick = () => checkQuizAnswer(div, i, q.ans, q.exp);
+            container.appendChild(div);
+        });
+    }
+
+    function checkQuizAnswer(el, selected, correct, expText) {
+        const parent = document.getElementById('quiz-options');
+        if(parent.classList.contains('answered')) return;
+        parent.classList.add('answered');
+
+        const opts = parent.getElementsByClassName('q-opt');
+        
+        if(selected === correct) {
+            el.classList.add('correct');
+            quizScore += 10;
+            document.getElementById('quiz-score').innerText = `Score: ${quizScore}`;
+        } else {
+            el.classList.add('wrong');
+            opts[correct].classList.add('correct');
+        }
+
+        const expDiv = document.getElementById('quiz-explanation');
+        expDiv.innerHTML = `💡 <b>Explanation:</b> ${expText}`;
+        expDiv.style.display = 'block';
+        document.getElementById('quiz-next-btn').style.display = 'block';
+    }
+
+    function nextQuizQuestion() {
+        currentQIdx++;
+        if(currentQIdx < 10) {
+            renderQuizQuestion();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    function finishQuiz() {
+        document.getElementById('quiz-play-view').style.display = 'none';
+        document.getElementById('quiz-result-view').style.display = 'block';
+        document.getElementById('final-score').innerText = quizScore;
+        
+        let msg = "";
+        if(quizScore >= 80) msg = "Awesome! You are ready!";
+        else if(quizScore >= 60) msg = "Good pass! Review the notes.";
+        else msg = "Keep practicing! Check the explanations.";
+        document.getElementById('final-msg').innerText = msg;
+    }
+</script>
+
+</body>
+</html>
