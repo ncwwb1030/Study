@@ -95,4 +95,448 @@
             </div>
         </div>
 
-        <div v-if="currentTab === 'graph
+        <div v-if="currentTab === 'graph'" class="bg-white rounded-3xl shadow-sm p-4 min-h-[600px] flex flex-col border border-gray-100 fade-in">
+            <div class="flex justify-between items-center mb-2 px-2">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center">
+                    <span class="w-1 h-6 bg-purple-500 rounded-full mr-3"></span>
+                    Knowledge Graph
+                </h2>
+                <span class="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded-md font-bold">Zoomable</span>
+            </div>
+            <div class="flex-1 bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden flex items-center justify-center relative graph-container">
+                <div class="mermaid transform scale-90">
+                    graph TD
+                    ML[Machine Learning] --> Sup[Supervised]
+                    ML --> Unsup[Unsupervised]
+                    ML --> RL[Reinforcement]
+                    
+                    Sup --> Reg[Regression]
+                    Sup --> Class[Classification]
+                    
+                    Reg --> LinR[Linear / Multiple Reg]
+                    Reg --> Regu[Regularization]
+                    Regu --> Lasso[Lasso L1]
+                    Regu --> Ridge[Ridge L2]
+                    
+                    Class --> LogR[Logistic Regression]
+                    Class --> DT[Decision Tree]
+                    Class --> ANN[ANN]
+                    Class --> Ens[Ensemble]
+                    Class --> Deep[Deep Learning]
+                    
+                    Deep --> CNN[CNN]
+                    CNN --> Conv[Convolution]
+                    CNN --> Pool[Pooling]
+                    
+                    DT --> RF[Random Forest]
+                    DT --> Ada[AdaBoost]
+                    
+                    Unsup --> Clust[Clustering]
+                    Unsup --> PCA[PCA Dim Red]
+                    
+                    Clust --> KM[K-Means]
+                    Clust --> Hier[Hierarchical]
+                    
+                    RL --> MAB[Multi-Armed Bandits]
+                    MAB --> Exp[Exploration vs Exploitation]
+
+                    style ML fill:#2563eb,stroke:#fff,color:#fff
+                    style Sup fill:#bfdbfe,stroke:#2563eb
+                    style Unsup fill:#bbf7d0,stroke:#16a34a
+                    style RL fill:#ddd6fe,stroke:#7c3aed
+                </div>
+            </div>
+        </div>
+
+        <div v-if="currentTab === 'notes'" class="space-y-4 fade-in">
+            <div class="bg-white rounded-3xl shadow-sm p-4 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-gray-800 pl-2">Study Notes</h2>
+                <div class="text-xs font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">L1 - L10</div>
+            </div>
+
+            <div v-for="(note, index) in notesData" :key="index" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 group">
+                <div @click="toggleNote(index)" class="p-5 flex justify-between items-center cursor-pointer hover:bg-gray-50">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-gray-100 text-gray-600 group-hover:bg-blue-600 group-hover:text-white transition-colors flex items-center justify-center font-bold text-sm shadow-sm">
+                            {{ note.id }}
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm">{{ note.title }}</h3>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-300 transition-transform duration-300" :class="{'rotate-180': note.isOpen}"></i>
+                </div>
+                <div v-show="note.isOpen" class="px-5 pb-6 bg-gray-50/50 border-t border-gray-100">
+                    <ul class="space-y-3 mt-4">
+                        <li v-for="(point, pIndex) in note.points" :key="pIndex" class="flex items-start text-sm text-gray-600 leading-relaxed">
+                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                            <span v-html="point"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="currentTab === 'bank'" class="space-y-4 fade-in">
+            <div class="sticky top-0 z-30 pt-2 pb-2 -mx-4 px-4 bg-gray-50/95 backdrop-blur-sm border-b border-gray-200/50">
+                <div class="flex overflow-x-auto hide-scrollbar gap-2 pb-1">
+                    <button @click="bankFilter = 'All'" 
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm whitespace-nowrap border"
+                        :class="bankFilter === 'All' ? 'bg-gray-800 text-white border-gray-800 scale-105' : 'bg-white text-gray-500 border-gray-200'">
+                        All
+                    </button>
+                    <button @click="bankFilter = 'Practice'" 
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm whitespace-nowrap border"
+                        :class="bankFilter === 'Practice' ? 'bg-emerald-600 text-white border-emerald-600 scale-105' : 'bg-white text-gray-500 border-gray-200'">
+                        Practice PDF
+                    </button>
+                    <button v-for="lec in lecturesList" :key="lec" 
+                        @click="bankFilter = lec"
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm whitespace-nowrap border"
+                        :class="bankFilter === lec ? 'bg-blue-600 text-white border-blue-600 scale-105' : 'bg-white text-gray-500 border-gray-200'">
+                        {{ lec }}
+                    </button>
+                </div>
+            </div>
+
+            <div v-for="(q, index) in filteredQuestions" :key="index" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-[10px] font-bold px-2 py-1 rounded text-white tracking-wide" 
+                              :class="q.source === 'Practice' ? 'bg-emerald-500' : 'bg-blue-500'">
+                            {{ q.category }}
+                        </span>
+                    </div>
+                    <p class="font-bold text-gray-800 text-sm leading-relaxed mb-4">{{ q.question }}</p>
+                    
+                    <div class="space-y-2 mb-2">
+                        <button v-for="(opt, oIdx) in q.options" :key="oIdx" 
+                             @click="interactBank(q, opt)"
+                             :disabled="q.userSelected !== null"
+                             class="w-full text-left text-sm px-4 py-3 rounded-xl border transition-all duration-200 relative overflow-hidden"
+                             :class="getBankOptionClass(q, opt)">
+                            <div class="flex justify-between items-center relative z-10">
+                                <span>{{ opt }}</span>
+                                <i v-if="q.userSelected !== null && opt === q.answer" class="fas fa-check-circle text-green-600"></i>
+                                <i v-if="q.userSelected === opt && opt !== q.answer" class="fas fa-times-circle text-red-500"></i>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <div v-if="q.userSelected !== null" class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-600">
+                        <div class="font-bold mb-1 flex items-center text-gray-800"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i> Explanation</div>
+                        {{ q.explanation || "Correct answer: " + q.answer }}
+                    </div>
+                </div>
+            </div>
+            <div v-if="filteredQuestions.length === 0" class="text-center py-20 text-gray-400 text-sm">
+                No questions found.
+            </div>
+        </div>
+
+        <div v-if="currentTab === 'quiz'" class="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 min-h-[550px] flex flex-col justify-center relative overflow-hidden fade-in">
+            
+            <div v-if="quizState === 'start'" class="text-center z-10">
+                <div class="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-blue-600 text-6xl mb-6 shadow-inner animate-pulse">
+                    <i class="fas fa-infinity"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-gray-800 mb-2">Infinite Quiz</h2>
+                <p class="text-gray-500 text-sm mb-8 px-4 leading-relaxed">
+                    AI generated questions based on L1-L10 core concepts. 
+                    <br><span class="text-xs text-blue-500 font-bold mt-2 block">10 Random Questions per round.</span>
+                </p>
+                <button @click="startQuiz" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                    Generate Quiz <i class="fas fa-magic"></i>
+                </button>
+            </div>
+
+            <div v-if="quizState === 'playing'" class="flex-1 flex flex-col z-10">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">Question</span>
+                        <span class="text-2xl font-black text-gray-800">{{ currentQuestionIndex + 1 }}<span class="text-gray-300 text-lg font-medium">/10</span></span>
+                    </div>
+                    <div class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold border border-blue-100">
+                        Score: {{ score }}
+                    </div>
+                </div>
+
+                <div class="w-full bg-gray-100 h-2 rounded-full mb-8 overflow-hidden">
+                    <div class="bg-blue-500 h-full rounded-full transition-all duration-500 ease-out" :style="{ width: ((currentQuestionIndex + 1) / 10) * 100 + '%' }"></div>
+                </div>
+                
+                <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6">
+                    <span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">{{ currentQuizQuestion.topic }}</span>
+                    <h3 class="text-md font-bold text-gray-800 leading-relaxed">{{ currentQuizQuestion.question }}</h3>
+                </div>
+                
+                <div class="space-y-3 flex-1">
+                    <button v-for="(opt, idx) in currentQuizQuestion.options" :key="idx"
+                        @click="checkAnswer(opt)"
+                        :class="getQuizOptionClass(opt)"
+                        :disabled="hasAnswered"
+                        class="w-full text-left p-4 rounded-xl border-2 text-sm font-medium transition-all duration-200 relative overflow-hidden group">
+                        <span class="relative z-10">{{ opt }}</span>
+                    </button>
+                </div>
+
+                <div v-if="hasAnswered" class="mt-6">
+                    <div v-if="!isCorrect" class="p-4 bg-red-50 border-l-4 border-red-500 text-xs text-red-800 mb-4 rounded-r-xl shadow-sm">
+                        <strong class="block mb-1 text-sm">Correct Answer:</strong> 
+                        {{ currentQuizQuestion.answer }}
+                        <div class="mt-2 pt-2 border-t border-red-100 text-gray-600">{{ currentQuizQuestion.explanation }}</div>
+                    </div>
+                    <div v-else class="p-4 bg-green-50 border-l-4 border-green-500 text-xs text-green-800 mb-4 rounded-r-xl shadow-sm">
+                         <strong class="block mb-1 text-sm">Excellent!</strong>
+                         {{ currentQuizQuestion.explanation }}
+                    </div>
+
+                    <button @click="nextQuestion" class="w-full bg-gray-800 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform flex justify-center items-center gap-2">
+                        {{ currentQuestionIndex < 9 ? 'Next' : 'Finish' }} <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="quizState === 'result'" class="text-center z-10">
+                <div class="mb-6 transform scale-110">
+                    <div class="inline-block p-6 rounded-full bg-white text-6xl shadow-xl border-4" :class="score >= 6 ? 'border-green-400 text-green-500' : 'border-orange-400 text-orange-500'">
+                        {{ score === 10 ? '👑' : (score >= 6 ? '🎉' : '📚') }}
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-1">Session Complete</h2>
+                <p class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-6">Final Score</p>
+                
+                <div class="bg-white rounded-2xl p-6 mb-6 border border-gray-100 shadow-sm">
+                    <div class="text-5xl font-black text-gray-800 mb-2">{{ score }}<span class="text-2xl text-gray-300">/10</span></div>
+                    <p class="text-sm text-gray-500 font-medium">
+                        {{ score >= 8 ? 'Mastery level achieved!' : (score >= 5 ? 'Good progress.' : 'Review notes and try again.') }}
+                    </p>
+                </div>
+
+                <button @click="startQuiz" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform">
+                    Start New Round
+                </button>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    const { createApp, ref, onMounted, watch, nextTick, computed } = Vue;
+
+    createApp({
+        setup() {
+            // --- State ---
+            const currentTab = ref('outline');
+            const tabs = [
+                { id: 'outline', name: 'Outline', icon: 'fas fa-list-ul' },
+                { id: 'graph', name: 'Graph', icon: 'fas fa-project-diagram' },
+                { id: 'notes', name: 'Notes', icon: 'fas fa-book-open' },
+                { id: 'bank', name: 'Bank', icon: 'fas fa-layer-group' },
+                { id: 'quiz', name: 'AI Quiz', icon: 'fas fa-robot' },
+            ];
+
+            const switchTab = (id) => {
+                currentTab.value = id;
+            };
+
+            // --- Data: Outline ---
+            const outlineData = [
+                { category: "Overview", topic: "Model Landscape", details: "Supervised vs Unsupervised vs RL. Descriptive to Prescriptive Analytics.", color: "bg-blue-400" },
+                { category: "Regression", topic: "Linear & Regularization", details: "MSE, RMSE, R². Bias-Variance. Lasso (L1) vs Ridge (L2).", color: "bg-green-400" },
+                { category: "Classification", topic: "Logistic & Trees", details: "Logit, Odds Ratio, Gini, Entropy. Pruning. Precision/Recall/AUC.", color: "bg-purple-400" },
+                { category: "Advanced", topic: "ANN, Ensemble, CNN", details: "Backprop, Activation. Bagging vs Boosting. Convolution layers.", color: "bg-orange-400" }
+            ];
+
+            // --- Data: Notes ---
+            const notesData = ref([
+                { id: "L1", title: "Introduction", isOpen: false, points: ["<b>Supervised:</b> Labeled data (Target Y). Regression & Classification.", "<b>Unsupervised:</b> No labels. Clustering & Dimension Reduction (PCA).", "<b>Reinforcement:</b> Agent, Environment, Rewards. Ex: Multi-Armed Bandits.", "<b>Deep Learning:</b> Subset of ML using multi-layer NNs."] },
+                { id: "L2", title: "Clustering & PCA", isOpen: false, points: ["<b>K-Means:</b> Partitioning. Random centroids -> Assign -> Update. Sensitive to outliers.", "<b>Hierarchical:</b> Agglomerative (Bottom-up). Dendrogram. No fixed K.", "<b>Euclidean Distance:</b> Needs Standardization (scaling).", "<b>PCA:</b> Unsupervised dimension reduction. PC1 max variance."] },
+                { id: "L3", title: "Regression Models", isOpen: false, points: ["<b>Linear Reg:</b> MSE, RMSE, R². Multicollinearity issues.", "<b>Logistic Reg:</b> Binary Y. Sigmoid function. Logit is linear.", "<b>Metrics:</b> Precision (TP/Pred P), Recall (TP/Act P), AUC/ROC."] },
+                { id: "L4", title: "Methodology", isOpen: false, points: ["<b>Bias-Variance:</b> Simple=High Bias, Complex=High Variance.", "<b>Lasso (L1):</b> Feature Selection (coeff -> 0).", "<b>Ridge (L2):</b> Shrinks coeff. Good for multicollinearity.", "<b>Validation:</b> Tune hyperparameters. Test set only for final eval."] },
+                { id: "L5", title: "Decision Trees", isOpen: false, points: ["<b>Split:</b> Gini/Entropy (Class), SSE (Reg). Greedy.", "<b>Pruning:</b> Prevents overfitting (Cost-complexity).", "<b>C4.5/C5.0:</b> Uses Information Gain Ratio to avoid bias to many levels."] },
+                { id: "L7", title: "Neural Networks", isOpen: false, points: ["<b>Structure:</b> Input -> Hidden -> Output.", "<b>Activation:</b> ReLU, Sigmoid. Adds Non-linearity.", "<b>Backpropagation:</b> Calculates gradients via Chain Rule to update weights."] },
+                { id: "L8", title: "Ensemble", isOpen: false, points: ["<b>Bagging:</b> Parallel. Bootstrap. Reduces Variance. Ex: Random Forest.", "<b>Boosting:</b> Sequential. Corrects errors. Reduces Bias. Ex: AdaBoost."] },
+                { id: "L9", title: "MAB (RL)", isOpen: false, points: ["<b>Problem:</b> Maximize reward from unknown slots.", "<b>Strategies:</b> E-Greedy (Random explore), Thompson Sampling (Bayesian/Beta dist)."] },
+                { id: "L10", title: "CNN", isOpen: false, points: ["<b>Convolution:</b> Extracts local features (edges). Parameter sharing.", "<b>Pooling:</b> Downsampling (Max). Invariance.", "<b>Structure:</b> Conv -> ReLU -> Pool -> FC."] }
+            ]);
+
+            // --- Question Bank ---
+            const rawQuestions = [
+                { src: "Practice", cat: "General", q: "Which describes underfitting?", a: "Low variance and high bias", opts: ["High variance and high bias", "High variance and low bias", "Low variance and high bias", "Low variance and low bias"] },
+                { src: "Practice", cat: "L4 Reg", q: "How does Ridge regularization mitigate overfitting?", a: "Increase bias a bit and reduce variance", opts: ["Reduce bias and variance", "Increase bias a bit and reduce variance", "Reduce bias and increase variance", "Increase bias and variance"], explanation: "Regularization increases bias to significantly reduce variance (overfitting)." },
+                { src: "Practice", cat: "L4 Method", q: "How will training set's R² move as model complexity increases?", a: "It always goes up", opts: ["Goes down then up", "Goes up then down", "Always goes down", "Always goes up"], explanation: "Training error decreases (R² increases) as complexity grows, potentially leading to overfitting." },
+                { src: "Practice", cat: "L4 Method", q: "What is the purpose of validation set?", a: "It prevents overfitting and helps in hyperparameter tuning", opts: ["Helps memorize data", "Prevents overfitting and helps in hyperparameter tuning", "Only for testing final model", "Increases training size"] },
+                { src: "Practice", cat: "L3 Metrics", q: "Target is binary (30% 0, 70% 1). If you predict all as 1, what is training accuracy?", a: "70%", opts: ["30%", "70%", "50%", "Depends"] },
+                { src: "Practice", cat: "L3 Logistic", q: "In which problem is Logistic Regression commonly used?", a: "Binary classification problems", opts: ["Regression", "MAB", "Binary classification problems", "Clustering"] },
+                { src: "Practice", cat: "L5 Tree", q: "How does C5.0 prevent favoritism towards inputs with many splits?", a: "Uses information gain ratio", opts: ["Random noise", "Equal chance", "Uses information gain ratio", "Favors binary inputs"] },
+                { src: "Practice", cat: "L7 ANN", q: "Which statement is FALSE about neural networks?", a: "Neural networks are highly interpretable", opts: ["Neural networks are highly interpretable", "Require large labelled data", "Computationally heavy", "Prone to overfitting"] },
+                { src: "Practice", cat: "L8 Ensemble", q: "What statement is TRUE about AdaBoost?", a: "Adapts to mistakes of previous models", opts: ["Equal weight to all models", "Less sensitive to noise", "Trains single complex model", "Adapts to mistakes of previous models"] },
+                { src: "Practice", cat: "L9 MAB", q: "True statement about exploration-exploitation trade-off?", a: "Balancing helps discover best arm over time", opts: ["Balancing helps discover best arm over time", "Max exploration is best", "Exploitation is random", "Exploration ignores long-term"] },
+                { src: "Kahoot", cat: "L1 Intro", q: "Market segmentation is Supervised Learning.", a: "False", opts: ["True", "False"], explanation: "It is Unsupervised (Clustering)." },
+                { src: "Kahoot", cat: "L1 Intro", q: "Why truncate SVD?", a: "To keep only a few top-ranked topics", opts: ["Find all topics", "To keep only a few top-ranked topics", "To remove zeros", "To create labels"] },
+                { src: "Kahoot", cat: "L2 Cluster", q: "Which is FALSE about K-Means?", a: "If start with K=3, might end with 2 clusters", opts: ["Start with random centroids", "Assign to nearest", "If start with K=3, might end with 2 clusters", "Stop when no change"], explanation: "K-Means keeps K constant." },
+                { src: "Kahoot", cat: "L2 Cluster", q: "Silhouette Score is NOT about?", a: "Whether each observation is in the right cluster", opts: ["Cohesion", "Separation", "Whether each observation is in the right cluster"] },
+                { src: "Kahoot", cat: "L3 Reg", q: "Which coefficient indicates vertical height difference between two lines (dummy)?", a: "Beta1", opts: ["Beta0", "Beta1", "Beta2", "y"] },
+                { src: "Kahoot", cat: "L3 Logistic", q: "Which sum equals 1?", a: "TPR + FNR", opts: ["TPR + FPR", "TNR + FNR", "TPR + FNR", "Precision + TPR"] },
+                { src: "Kahoot", cat: "L4 Method", q: "Low Bias and High Variance describes?", a: "Complex model; overfitting", opts: ["Complex model; overfitting", "Simple model; underfitting", "Simple model; overfitting"] },
+                { src: "Kahoot", cat: "L4 Reg", q: "Which regularization produces sparse coefficients?", a: "LASSO", opts: ["LASSO", "Ridge"] },
+                { src: "Kahoot", cat: "L5 Tree", q: "Technique to prevent overfitting in trees?", a: "Pruning", opts: ["Increasing depth", "Adding variables", "Pruning", "Increasing leaves"] },
+                { src: "Kahoot", cat: "L7 ANN", q: "Activation function outputting 0 to 1?", a: "Sigmoid", opts: ["ReLU", "Sigmoid", "Tanh", "Linear"] },
+                { src: "Kahoot", cat: "L8 Ensemble", q: "Main idea of boosting?", a: "Reduce bias by sequentially improving weak learners", opts: ["Deep trees", "Reduce bias by sequentially improving weak learners", "Parallel models", "Remove correlated"] },
+                { src: "Kahoot", cat: "L9 MAB", q: "Which metric is good for imbalanced classes?", a: "F1 Score", opts: ["Accuracy", "Precision", "Recall", "F1 Score"] },
+                { src: "Kahoot", cat: "L10 CNN", q: "Primary purpose of convolution?", a: "Feature extraction", opts: ["Non-linear activation", "Regularization", "Feature extraction", "Dim reduction"] }
+            ];
+
+            const questionBank = ref(rawQuestions.map(q => ({
+                category: q.cat,
+                question: q.q,
+                answer: q.a,
+                options: q.opts,
+                source: q.src,
+                explanation: q.explanation || null,
+                userSelected: null
+            })));
+
+            const bankFilter = ref('All');
+            const lecturesList = ["L1 Intro", "L2 Cluster", "L3 Reg", "L3 Logistic", "L4 Method", "L4 Reg", "L5 Tree", "L7 ANN", "L8 Ensemble", "L9 MAB", "L10 CNN"];
+
+            const filteredQuestions = computed(() => {
+                if (bankFilter.value === 'All') return questionBank.value;
+                if (bankFilter.value === 'Practice') return questionBank.value.filter(q => q.source === 'Practice');
+                return questionBank.value.filter(q => q.category === bankFilter.value);
+            });
+
+            // --- AI Quiz Logic ---
+            const quizState = ref('start'); 
+            const quizQuestions = ref([]);
+            const currentQuestionIndex = ref(0);
+            const score = ref(0);
+            const hasAnswered = ref(false);
+            const isCorrect = ref(false);
+            const currentQuizQuestion = ref({});
+
+            // 模板生成器
+            const quizTemplates = [
+                {
+                    topic: "Model Classification",
+                    gen: () => {
+                        const pairs = [{ m: "K-Means", t: "Unsupervised" }, { m: "Linear Regression", t: "Supervised" }, { m: "Decision Tree", t: "Supervised" }, { m: "PCA", t: "Unsupervised" }, { m: "Multi-Armed Bandits", t: "Reinforcement Learning" }, { m: "Random Forest", t: "Supervised" }];
+                        const target = pairs[Math.floor(Math.random() * pairs.length)];
+                        return { q: `What type of learning method is ${target.m}?`, a: target.t, opts: ["Supervised", "Unsupervised", "Reinforcement Learning", "Semi-Supervised"], exp: `${target.m} belongs to ${target.t}.` };
+                    }
+                },
+                {
+                    topic: "Evaluation Metrics",
+                    gen: () => {
+                        const qs = [{ q: "False Negatives are costly (e.g., Cancer)", m: "Recall" }, { q: "False Positives are costly (e.g., Spam)", m: "Precision" }, { q: "Classes are heavily imbalanced", m: "F1 Score or AUC" }, { q: "General Regressor performance", m: "RMSE" }];
+                        const item = qs[Math.floor(Math.random() * qs.length)];
+                        return { q: `Which metric is most appropriate when ${item.q}?`, a: item.m, opts: ["Accuracy", "Recall", "Precision", "RMSE", "F1 Score or AUC"].sort(() => 0.5 - Math.random()).slice(0,4), exp: `Optimization should focus on ${item.m}.` };
+                    }
+                },
+                {
+                    topic: "Deep Learning",
+                    gen: () => {
+                        const comps = [{ c: "Convolution", f: "Extracting local features" }, { c: "Pooling", f: "Downsampling and invariance" }, { c: "Activation Function", f: "Introducing non-linearity" }, { c: "Backpropagation", f: "Updating weights" }];
+                        const item = comps[Math.floor(Math.random() * comps.length)];
+                        return { q: `What is the primary role of ${item.c} in a Neural Network?`, a: item.f, opts: [item.f, "Linear transformation", "Data augmentation", "Initialization"], exp: `${item.c} is for ${item.f.toLowerCase()}.` };
+                    }
+                },
+                {
+                    topic: "Bias-Variance",
+                    gen: () => {
+                        const states = [{ s: "Underfitting", d: "High Bias, Low Variance" }, { s: "Overfitting", d: "Low Bias, High Variance" }];
+                        const item = states[Math.floor(Math.random() * states.length)];
+                        return { q: `A model that is suffering from ${item.s} typically exhibits:`, a: item.d, opts: ["High Bias, Low Variance", "Low Bias, High Variance", "Low Bias, Low Variance", "High Bias, High Variance"], exp: `${item.s} corresponds to ${item.d}.` };
+                    }
+                },
+                {
+                    topic: "Regularization",
+                    gen: () => {
+                        const items = [{n: "Lasso", f: "Shrinking coeff to zero"}, {n: "Ridge", f: "Shrinking coeff but keeping them"}];
+                        const sel = items[Math.floor(Math.random()*items.length)];
+                        return { q: `Which behavior is characteristic of ${sel.n} regularization?`, a: sel.f, opts: [sel.f, "Increasing variance", "Removing intercept", "Increasing bias massively"], exp: `${sel.n} is known for ${sel.f.toLowerCase()}.`};
+                    }
+                },
+                {
+                    topic: "Ensemble",
+                    gen: () => {
+                        const items = [{n: "Random Forest", f: "Bagging"}, {n: "AdaBoost", f: "Boosting"}];
+                        const sel = items[Math.floor(Math.random()*items.length)];
+                        return { q: `${sel.n} is an example of which ensemble technique?`, a: sel.f, opts: ["Bagging", "Boosting", "Stacking", "Clustering"], exp: `${sel.n} uses ${sel.f}.`};
+                    }
+                }
+            ];
+
+            const startQuiz = () => {
+                quizQuestions.value = [];
+                for(let i=0; i<10; i++) {
+                    const tmpl = quizTemplates[Math.floor(Math.random() * quizTemplates.length)];
+                    const qData = tmpl.gen();
+                    const shuffledOpts = [...qData.opts].sort(() => 0.5 - Math.random());
+                    quizQuestions.value.push({ topic: tmpl.topic, question: qData.q, answer: qData.a, options: shuffledOpts, explanation: qData.exp });
+                }
+                currentQuestionIndex.value = 0;
+                currentQuizQuestion.value = quizQuestions.value[0];
+                score.value = 0;
+                hasAnswered.value = false;
+                quizState.value = 'playing';
+            };
+
+            const checkAnswer = (selectedOpt) => {
+                if (hasAnswered.value) return;
+                hasAnswered.value = true;
+                const correct = currentQuizQuestion.value.answer;
+                if(selectedOpt === correct) {
+                    isCorrect.value = true;
+                    score.value++;
+                } else {
+                    isCorrect.value = false;
+                }
+            };
+
+            const nextQuestion = () => {
+                if (currentQuestionIndex.value < 9) {
+                    currentQuestionIndex.value++;
+                    currentQuizQuestion.value = quizQuestions.value[currentQuestionIndex.value];
+                    hasAnswered.value = false;
+                } else {
+                    quizState.value = 'result';
+                }
+            };
+
+            // Helpers
+            function toggleNote(index) { notesData.value[index].isOpen = !notesData.value[index].isOpen; }
+            function interactBank(q, opt) { q.userSelected = opt; }
+            function getBankOptionClass(q, opt) {
+                if (q.userSelected === null) return 'bg-white border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300 cursor-pointer';
+                if (opt === q.answer) return 'bg-green-50 border-green-500 text-green-700 font-bold';
+                if (opt === q.userSelected && opt !== q.answer) return 'bg-red-50 border-red-500 text-red-700 font-medium opacity-70';
+                return 'bg-gray-50 border-gray-100 text-gray-400 opacity-50';
+            }
+            function getQuizOptionClass(opt) {
+                if (!hasAnswered.value) return 'bg-white border-gray-200 text-gray-600 hover:border-blue-500 hover:shadow-md cursor-pointer';
+                const correct = currentQuizQuestion.value.answer;
+                if (opt === correct) return 'bg-green-50 border-green-500 text-green-700 font-bold shadow-sm';
+                return 'bg-gray-50 border-gray-100 text-gray-400 opacity-50';
+            }
+
+            watch(currentTab, (newTab) => {
+                if (newTab === 'graph') { nextTick(() => { mermaid.init(); }); }
+            });
+
+            onMounted(() => {
+                mermaid.initialize({ startOnLoad: false, theme: 'base', themeVariables: { fontFamily: 'Inter' } });
+            });
+
+            return {
+                currentTab, switchTab, outlineData, notesData, toggleNote,
+                filteredQuestions, bankFilter, lecturesList, interactBank, getBankOptionClass,
+                quizState, currentQuestionIndex, score, currentQuizQuestion, hasAnswered, isCorrect,
+                startQuiz, checkAnswer, nextQuestion, getQuizOptionClass
+            };
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>
